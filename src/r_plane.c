@@ -49,14 +49,14 @@ planefunction_t		ceilingfunc;
 //
 
 // Here comes the obnoxious "visplane".
-#define MAXVISPLANES	128
+#define MAXVISPLANES	TUNE_MAXVISPLANES
 visplane_t		visplanes[MAXVISPLANES];
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
 visplane_t*		ceilingplane;
 
 // ?
-#define MAXOPENINGS	SCREENWIDTH*64
+#define MAXOPENINGS	TUNE_MAXOPENINGS
 short			openings[MAXOPENINGS];
 short*			lastopening;
 
@@ -73,8 +73,8 @@ short			ceilingclip[SCREENWIDTH];
 // spanstart holds the start of a plane span
 // initialized to 0 at start
 //
-int			spanstart[SCREENHEIGHT];
-int			spanstop[SCREENHEIGHT];
+short			spanstart[SCREENHEIGHT];
+short			spanstop[SCREENHEIGHT];
 
 //
 // texture mapping
@@ -227,6 +227,7 @@ R_FindPlane
 	height = 0;			// all skys map together
 	lightlevel = 0;
     }
+
 	
     for (check=visplanes; check<lastvisplane; check++)
     {
@@ -243,9 +244,13 @@ R_FindPlane
 	return check;
 		
     if (lastvisplane - visplanes == MAXVISPLANES)
-	I_Error ("R_FindPlane: no more visplanes");
-		
+	{
+		//I_Error ("R_FindPlane: no more visplanes");
+		printf( "Visplane warning\n" );
+	}
+	
     lastvisplane++;
+    if (lastvisplane - visplanes == MAXVISPLANES) lastvisplane--;
 
     check->height = height;
     check->picnum = picnum;
@@ -315,6 +320,8 @@ R_CheckPlane
     lastvisplane->lightlevel = pl->lightlevel;
     
     pl = lastvisplane++;
+    if (lastvisplane - visplanes == MAXVISPLANES) lastvisplane--;
+
     pl->minx = start;
     pl->maxx = stop;
 

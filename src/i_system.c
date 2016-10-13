@@ -46,6 +46,11 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #include "i_system.h"
 
 
+#ifdef COMBINE_SCREENS
+unsigned char CombinedScreens[SCREENWIDTH*SCREENHEIGHT];
+#else
+unsigned char CombinedScreens[SCREENWIDTH*SCREENHEIGHT*4];
+#endif
 
 
 int	mb_used = 6;
@@ -70,12 +75,13 @@ ticcmd_t*	I_BaseTiccmd(void)
 
 int  I_GetHeapSize (void)
 {
-    return mb_used*1024*1024;
+    return FIXED_HEAP;
 }
 
 byte* I_ZoneBase (int*	size)
 {
-    *size = mb_used*1024*1024;
+	printf( "I_ZONE: %d\n", mb_used );
+    *size = FIXED_HEAP; //mb_used*1024*1024;
     return (byte *) malloc (*size);
 }
 
@@ -147,8 +153,7 @@ void I_EndRead(void)
 byte*	I_AllocLow(int length)
 {
     byte*	mem;
-        
-    mem = (byte *)malloc (length);
+    mem = CombinedScreens;
     memset (mem,0,length);
     return mem;
 }

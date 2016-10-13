@@ -45,7 +45,8 @@
 
 
 void	Z_Init (void);
-void*	Z_Malloc (int size, int tag, void *ptr);
+void*	Z_Malloc_Internal (int size, int tag, void *ptr);
+void*	Z_Malloc_Internal_Extended (int size, int tag, void *ptr, const char * fil, int line);
 void    Z_Free (void *ptr);
 void    Z_FreeTags (int lowtag, int hightag);
 void    Z_DumpHeap (int lowtag, int hightag);
@@ -71,10 +72,15 @@ typedef struct memblock_s
 //
 #define Z_ChangeTag(p,t) \
 { \
+	/* XXX This was edited by CNL because we don't care if the cache is bad.  It's almost certainly from a disk thing. */\
       if (( (memblock_t *)( (byte *)(p) - sizeof(memblock_t)))->id!=0x1d4a11) \
-	  I_Error("Z_CT at "__FILE__":%i",__LINE__); \
+	 /* I_Error("Z_CT at "__FILE__":%i",__LINE__); */; \
+		else \
 	  Z_ChangeTag2(p,t); \
 };
+
+#define Z_Malloc( size, tag, user ) \
+	Z_Malloc_Internal_Extended( size, tag, user, __FILE__, __LINE__);	\
 
 
 

@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "stubs.h"
 
 //
 // Global parameters/defines.
@@ -102,7 +103,7 @@ typedef enum
 //  menues etc. is tied to the scale implied
 //  by the graphics.
 #define	SCREEN_MUL		1
-#define	INV_ASPECT_RATIO	0.625 // 0.75, ideally
+#define	INV_ASPECT_RATIO	0.025 // 0.75, ideally
 
 // Defines suck. C sucks.
 // C++ might sucks for OOP, but it sure is a better C.
@@ -116,7 +117,7 @@ typedef enum
 
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS		4
+#define MAXPLAYERS		3
 
 // State updates, number of tics / second.
 #define TICRATE		35

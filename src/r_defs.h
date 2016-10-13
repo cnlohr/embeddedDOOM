@@ -37,13 +37,9 @@
 // SECTORS do store MObjs anyway.
 #include "p_mobj.h"
 
-
-
 #ifdef __GNUG__
 #pragma interface
 #endif
-
-
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
@@ -53,9 +49,6 @@
 #define SIL_BOTH		3
 
 #define MAXDRAWSEGS		256
-
-
-
 
 
 //
@@ -91,7 +84,6 @@ typedef struct
     fixed_t		x;
     fixed_t		y;
     fixed_t		z;
-
 } degenmobj_t;
 
 //
@@ -102,20 +94,8 @@ typedef	struct
 {
     fixed_t	floorheight;
     fixed_t	ceilingheight;
-    short	floorpic;
-    short	ceilingpic;
-    short	lightlevel;
-    short	special;
-    short	tag;
-
-    // 0 = untraversed, 1,2 = sndlines -1
-    int		soundtraversed;
-
     // thing that made a sound (or null)
     mobj_t*	soundtarget;
-
-    // mapblock bounding box for height changes
-    int		blockbox[4];
 
     // origin for any sounds played by the sector
     degenmobj_t	soundorg;
@@ -129,8 +109,21 @@ typedef	struct
     // thinker_t for reversable actions
     void*	specialdata;
 
-    int			linecount;
     struct line_s**	lines;	// [linecount] size
+
+    // mapblock bounding box for height changes
+    short	blockbox[4];
+
+    short	floorpic;
+    short	ceilingpic;
+    short	lightlevel;
+    short	special;
+    short	tag;
+
+    // 0 = untraversed, 1,2 = sndlines -1
+    short		soundtraversed;
+
+    short	linecount;
     
 } sector_t;
 
@@ -149,15 +142,14 @@ typedef struct
     // add this to the calculated texture top
     fixed_t	rowoffset;
 
+    // Sector the SideDef is facing.
+    sector_t*	sector;
+
     // Texture indices.
     // We do not maintain names here. 
     short	toptexture;
     short	bottomtexture;
     short	midtexture;
-
-    // Sector the SideDef is facing.
-    sector_t*	sector;
-    
 } side_t;
 
 
@@ -171,7 +163,6 @@ typedef enum
     ST_VERTICAL,
     ST_POSITIVE,
     ST_NEGATIVE
-
 } slopetype_t;
 
 
@@ -199,19 +190,20 @@ typedef struct line_s
     //  of the LineDef.
     fixed_t	bbox[4];
 
-    // To aid move clipping.
-    slopetype_t	slopetype;
 
     // Front and back sector.
     // Note: redundant? Can be retrieved from SideDefs.
     sector_t*	frontsector;
     sector_t*	backsector;
 
+    // To aid move clipping.
+    char	slopetype; //actually slopetype_t (But done this way to decrease size)
+
     // if == validcount, already checked
-    int		validcount;
+    short		validcount;
 
     // thinker_t for reversable actions
-    void*	specialdata;		
+   // void*	specialdata;		
 } line_t;
 
 

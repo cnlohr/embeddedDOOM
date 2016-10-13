@@ -89,7 +89,7 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 void D_DoomLoop (void);
 
 
-char*		wadfiles[MAXWADFILES];
+//char*		wadfiles[MAXWADFILES];
 
 
 boolean		devparm;	// started game with -devparm
@@ -119,11 +119,6 @@ FILE*		debugfile;
 boolean		advancedemo;
 
 
-
-
-char		wadfile[1024];		// primary wad file
-char		mapdir[1024];           // directory of development maps
-char		basedefault[1024];      // default file
 
 
 void D_CheckNetGame (void);
@@ -376,8 +371,8 @@ void D_DoomLoop (void)
 	{
 	    I_StartTic ();
 	    D_ProcessEvents ();
-	    G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
-	    if (advancedemo)
+		G_BuildTiccmd (&netcmds[consoleplayer][maketic%BACKUPTICS]);
+		if (advancedemo)
 		D_DoAdvanceDemo ();
 	    M_Ticker ();
 	    G_Ticker ();
@@ -538,23 +533,6 @@ char            title[128];
 
 
 //
-// D_AddFile
-//
-void D_AddFile (char *file)
-{
-    int     numwadfiles;
-    char    *newfile;
-	
-    for (numwadfiles = 0 ; wadfiles[numwadfiles] ; numwadfiles++)
-	;
-
-    newfile = malloc (strlen(file)+1);
-    strcpy (newfile, file);
-	
-    wadfiles[numwadfiles] = newfile;
-}
-
-//
 // IdentifyVersion
 // Checks availability of IWAD files by name,
 // to determine whether registered/commercial features
@@ -562,232 +540,11 @@ void D_AddFile (char *file)
 //
 void IdentifyVersion (void)
 {
-
-    char*	doom1wad;
-    char*	doomwad;
-    char*	doomuwad;
-    char*	doom2wad;
-
-    char*	doom2fwad;
-    char*	plutoniawad;
-    char*	tntwad;
-
-#ifdef NORMALUNIX
-    char *home;
-    char *doomwaddir;
-    doomwaddir = getenv("DOOMWADDIR");
-    if (!doomwaddir)
-	doomwaddir = ".";
-
-    // Commercial.
-    doom2wad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doom2wad, "%s/doom2.wad", doomwaddir);
-
-    // Retail.
-    doomuwad = malloc(strlen(doomwaddir)+1+8+1);
-    sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
-    
-    // Registered.
-    doomwad = malloc(strlen(doomwaddir)+1+8+1);
-    sprintf(doomwad, "%s/doom.wad", doomwaddir);
-    
-    // Shareware.
-    doom1wad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
-
-     // Bug, dear Shawn.
-    // Insufficient malloc, caused spurious realloc errors.
-    plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
-    sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
-
-    tntwad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(tntwad, "%s/tnt.wad", doomwaddir);
-
-
-    // French stuff.
-    doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
-    sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
-
-    home = getenv("HOME");
-    if (!home)
-      I_Error("Please set $HOME to your home directory");
-    sprintf(basedefault, "%s/.doomrc", home);
-#endif
-
-    if (M_CheckParm ("-shdev"))
-    {
-	gamemode = shareware;
-	devparm = true;
-	D_AddFile (DEVDATA"doom1.wad");
-	D_AddFile (DEVMAPS"data_se/texture1.lmp");
-	D_AddFile (DEVMAPS"data_se/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
-    if (M_CheckParm ("-regdev"))
-    {
-	gamemode = registered;
-	devparm = true;
-	D_AddFile (DEVDATA"doom.wad");
-	D_AddFile (DEVMAPS"data_se/texture1.lmp");
-	D_AddFile (DEVMAPS"data_se/texture2.lmp");
-	D_AddFile (DEVMAPS"data_se/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
-    if (M_CheckParm ("-comdev"))
-    {
-	gamemode = commercial;
-	devparm = true;
-	/* I don't bother
-	if(plutonia)
-	    D_AddFile (DEVDATA"plutonia.wad");
-	else if(tnt)
-	    D_AddFile (DEVDATA"tnt.wad");
-	else*/
-	    D_AddFile (DEVDATA"doom2.wad");
-	    
-	D_AddFile (DEVMAPS"cdata/texture1.lmp");
-	D_AddFile (DEVMAPS"cdata/pnames.lmp");
-	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
-    }
-
-    if ( !access (doom2fwad,R_OK) )
-    {
-	gamemode = commercial;
-	// C'est ridicule!
-	// Let's handle languages in config files, okay?
-	language = french;
-	printf("French version\n");
-	D_AddFile (doom2fwad);
-	return;
-    }
-
-    if ( !access (doom2wad,R_OK) )
-    {
-	gamemode = commercial;
-	D_AddFile (doom2wad);
-	return;
-    }
-
-    if ( !access (plutoniawad, R_OK ) )
-    {
-      gamemode = commercial;
-      D_AddFile (plutoniawad);
-      return;
-    }
-
-    if ( !access ( tntwad, R_OK ) )
-    {
-      gamemode = commercial;
-      D_AddFile (tntwad);
-      return;
-    }
-
-    if ( !access (doomuwad,R_OK) )
-    {
-      gamemode = retail;
-      D_AddFile (doomuwad);
-      return;
-    }
-
-    if ( !access (doomwad,R_OK) )
-    {
-      gamemode = registered;
-      D_AddFile (doomwad);
-      return;
-    }
-
-    if ( !access (doom1wad,R_OK) )
-    {
       gamemode = shareware;
-      D_AddFile (doom1wad);
-      return;
-    }
-
-    printf("Game mode indeterminate.\n");
-    gamemode = indetermined;
-
-    // We don't abort. Let's see what the PWAD contains.
-    //exit(1);
-    //I_Error ("Game mode indeterminate\n");
+      //D_AddFile ("doom1.wad");
 }
 
-//
-// Find a Response File
-//
-void FindResponseFile (void)
-{
-    int             i;
-#define MAXARGVS        100
-	
-    for (i = 1;i < myargc;i++)
-	if (myargv[i][0] == '@')
-	{
-	    FILE *          handle;
-	    int             size;
-	    int             k;
-	    int             index;
-	    int             indexinfile;
-	    char    *infile;
-	    char    *file;
-	    char    *moreargs[20];
-	    char    *firstargv;
-			
-	    // READ THE RESPONSE FILE INTO MEMORY
-	    handle = fopen (&myargv[i][1],"rb");
-	    if (!handle)
-	    {
-		printf ("\nNo such response file!");
-		exit(1);
-	    }
-	    printf("Found response file %s!\n",&myargv[i][1]);
-	    fseek (handle,0,SEEK_END);
-	    size = ftell(handle);
-	    fseek (handle,0,SEEK_SET);
-	    file = malloc (size);
-	    fread (file,size,1,handle);
-	    fclose (handle);
-			
-	    // KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
-	    for (index = 0,k = i+1; k < myargc; k++)
-		moreargs[index++] = myargv[k];
-			
-	    firstargv = myargv[0];
-	    myargv = malloc(sizeof(char *)*MAXARGVS);
-	    memset(myargv,0,sizeof(char *)*MAXARGVS);
-	    myargv[0] = firstargv;
-			
-	    infile = file;
-	    indexinfile = k = 0;
-	    indexinfile++;  // SKIP PAST ARGV[0] (KEEP IT)
-	    do
-	    {
-		myargv[indexinfile++] = infile+k;
-		while(k < size &&
-		      ((*(infile+k)>= ' '+1) && (*(infile+k)<='z')))
-		    k++;
-		*(infile+k) = 0;
-		while(k < size &&
-		      ((*(infile+k)<= ' ') || (*(infile+k)>'z')))
-		    k++;
-	    } while(k < size);
-			
-	    for (k = 0;k < index;k++)
-		myargv[indexinfile++] = moreargs[k];
-	    myargc = indexinfile;
-	
-	    // DISPLAY ARGS
-	    printf("%d command-line args:\n",myargc);
-	    for (k=1;k<myargc;k++)
-		printf("%s\n",myargv[k]);
 
-	    break;
-	}
-}
 
 
 //
@@ -798,8 +555,6 @@ void D_DoomMain (void)
     int             p;
     char                    file[256];
 
-    FindResponseFile ();
-	
     IdentifyVersion ();
 	
     setbuf (stdout, NULL);
@@ -874,13 +629,7 @@ void D_DoomMain (void)
     if (devparm)
 	printf(D_DEVSTR);
     
-    if (M_CheckParm("-cdrom"))
-    {
-	printf(D_CDROM);
-	mkdir("c:\\doomdata",0);
-	strcpy (basedefault,"c:/doomdata/default.cfg");
-    }	
-    
+
     // turbo option
     if ( (p=M_CheckParm ("-turbo")) )
     {
@@ -932,9 +681,10 @@ void D_DoomMain (void)
 	      sprintf (file,"~"DEVMAPS"cdata/map%i.wad", p);
 	    break;
 	}
-	D_AddFile (file);
+	//D_AddFile (file);
     }
 	
+/*
     p = M_CheckParm ("-file");
     if (p)
     {
@@ -956,7 +706,7 @@ void D_DoomMain (void)
 	D_AddFile (file);
 	printf("Playing demo %s.lmp.\n",myargv[p+1]);
     }
-    
+*/    
     // get skill / episode / map from parms
     startskill = sk_medium;
     startepisode = 1;
@@ -1017,9 +767,8 @@ void D_DoomMain (void)
     printf ("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
 
-    printf ("W_Init: Init WADfiles.\n");
-    W_InitMultipleFiles (wadfiles);
-    
+//    printf ("W_Init: Init WADfiles.\n");
+//    W_InitMultipleFiles (wadfiles);
 
     // Check for -file in shareware
     if (modifiedgame)
@@ -1100,6 +849,7 @@ void D_DoomMain (void)
     printf ("I_Init: Setting up machine state.\n");
     I_Init ();
 
+
     printf ("D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
 
@@ -1166,6 +916,285 @@ void D_DoomMain (void)
 	    D_StartTitle ();                // start up intro loop
 
     }
+
+#ifdef GENERATE_BAKED
+	int i;
+	extern int numtextures;
+	printf( "NRT: %d\n", numtextures );
+	for( i = 0; i < numtextures; i++ )
+	{
+		R_GenerateComposite( i );
+	}
+
+extern const int*			texturewidthmask;
+extern const int*			texturecompositesize;
+extern const short**			texturecolumnlump;
+extern const unsigned short**	texturecolumnofs;
+extern const byte**			texturecomposite;
+extern const texture_t**	textures;
+
+	FILE * bf = fopen( "support/baked_texture_data.c", "w" );
+	fprintf( bf, "//This file is autogenerated when compiled against GENERATE_BAKED and run.\n" );
+	fprintf( bf, "#include \"../r_data.h\"\n" );
+	fprintf( bf, "const int	numtextures = %d;\n", numtextures );
+
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		int j;
+		fprintf( bf, "static const unsigned char textureData%d[] = { ", i );
+		for( j = 0; j < sizeof( texpatch_t ) * textures[i]->patchcount + 14; j++ )
+		{
+			fprintf( bf, "0x%02x, ", ((unsigned char*)textures[i])[j] );
+		}
+		fprintf( bf, "};\n" );
+	}
+
+	fprintf( bf, "const texture_t*	textures[%d] = {", numtextures );
+	for( i = 0;  i < numtextures; i++ )
+	{
+		if( (i & 0x03) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "(const texture_t*)&textureData%d, ", i );
+	}
+	fprintf( bf, "}; \n\n" );
+
+	fprintf( bf, "const int texturewidthmask[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x1f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "%d,", texturewidthmask[i] );
+	}
+	fprintf( bf, "}; \n\n" );
+	
+	fprintf( bf, "const fixed_t textureheight[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x0f) == 0 )fprintf( bf, "\n\t" );
+		fprintf( bf, "%d,", textureheight[i] );
+	}
+	fprintf( bf, "}; \n\n" );
+	
+	fprintf( bf, "const int texturecompositesize[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "%d,", texturecompositesize[i] );
+	}
+	fprintf( bf, "};\n\n" );
+
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( texturecolumnlump[i] )
+		{
+			int j;
+			fprintf( bf, "static const short tclump_%d[] = {", i );
+			for(j = 0;  j < textures[i]->width; j++ )
+			{
+				if( (i & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+				fprintf( bf, "%d,", texturecolumnlump[i][j] );
+			}
+			fprintf( bf, "};\n" );
+		}
+	}
+	fprintf( bf, "\n" );
+	fprintf( bf, "const short*			texturecolumnlump[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x07) == 0 ) fprintf( bf, "\n\t" );
+		if( texturecolumnlump[i] )
+			fprintf( bf, "tclump_%d, ", i );
+		else
+			fprintf( bf, "0, " );
+	}
+	fprintf( bf, "}; \n\n" );
+
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( texturecolumnofs[i] )
+		{
+			int j;
+			fprintf( bf, "static const short tccolofs_%d[] = {", i );
+			for(j = 0;  j < textures[i]->width;j ++ )
+			{
+				if( (i & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+				fprintf( bf, "%d,", texturecolumnofs[i][j] );
+			}
+			fprintf( bf, "};\n" );
+		}
+	}
+	fprintf( bf, "const short * const		texturecolumnofs[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x07) == 0 ) fprintf( bf, "\n\t" );
+		if( texturecolumnofs[i] )
+			fprintf( bf, "tccolofs_%d, ", i );
+		else
+			fprintf( bf, "0, " );
+	}
+	fprintf( bf, "}; \n\n" );
+
+
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( texturecomposite[i] )
+		{
+			fprintf( bf, "static const unsigned char tcd_%d[] = {", i );
+			int j;
+			for( j = 0; j < texturecompositesize[i]; j++ )
+			{
+				if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+				fprintf( bf, "0x%02x, ", texturecomposite[i][j] );
+			}
+			fprintf( bf, "};\n" );
+		}
+	}
+	fprintf( bf, "\n" );
+	fprintf( bf, "const unsigned char *	texturecomposite[%d] = {", numtextures );
+	for( i = 0;  i < numtextures;i ++ )
+	{
+		if( (i & 0x07) == 0 ) fprintf( bf, "\n\t" );
+		if( texturecomposite[i] )
+			fprintf( bf, "tcd_%d, ", i );
+		else
+			fprintf( bf, "0, " );
+	}
+	fprintf( bf, "}; \n" );
+	int j;
+	extern int numspritelumps;
+	extern int		firstspritelump;
+	extern int		lastspritelump;
+	fprintf( bf, "const int numspritelumps = %d;\n", numspritelumps );
+	fprintf( bf, "const int lastspritelump = %d;\n", lastspritelump );
+	fprintf( bf, "const int firstspritelump = %d;\n", firstspritelump );
+	fprintf( bf, "const fixed_t spritewidth[] = {" );
+	for( j = 0; j < numspritelumps; j++ )
+	{
+		if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "0x%02x, ", spritewidth[j] );
+	}
+	fprintf( bf, "};\n" );
+	fprintf( bf, "const fixed_t spritetopoffset[] = {" );
+	for( j = 0; j < numspritelumps; j++ )
+	{
+		if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "0x%02x, ", spritetopoffset[j] );
+	}
+	fprintf( bf, "};\n" );
+	fprintf( bf, "const fixed_t spriteoffset[] = {" );
+	for( j = 0; j < numspritelumps; j++ )
+	{
+		if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "0x%02x, ", spriteoffset[j] );
+	}
+	fprintf( bf, "};\n" );
+
+	fprintf( bf, "const lighttable_t colormaps[] = {" );
+	for( j = 0; j < colormapsize; j++ )
+	{
+		if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "0x%02x, ", colormaps[j] );
+	}
+	fprintf( bf, "};\n" );
+
+	fprintf( bf, "const unsigned char translationtables[] = {" );
+	for( j = 0; j < 256*3+255; j++ )
+	{
+		if( (j & 0x0f) == 0 ) fprintf( bf, "\n\t" );
+		fprintf( bf, "0x%02x, ", translationtables[j] );
+	}
+	fprintf( bf, "};\n" );
+
+	R_ExecuteSetViewSize();
+
+	fprintf( bf, "const int viewangletox[] = { " );
+	for( i = 0; i < FINEANGLES/2; i++ )
+		fprintf( bf, "%d, ", viewangletox[i] );
+	fprintf( bf, " };\n" );
+
+	fprintf( bf, "const angle_t	xtoviewangle[] = { " );
+	for( i = 0; i < SCREENWIDTH+1; i++ )
+		fprintf( bf, "%d, ", xtoviewangle[i] );
+	fprintf( bf, " };\n" );
+
+
+
+
+
+	fclose( bf );
+
+
+// Store VERTEXES, ... and hopefully some day LINEDEFS, SIDEDEFS, etc.
+//
+	{
+		printf( "Done creating baked_texture_data.c, moving onto maps.\n" );
+
+		bf = fopen( "support/baked_map_data.c", "w" );
+		fprintf( bf, "//This file is autogenerated when compiled against GENERATE_BAKED and run.\n" );
+		fprintf( bf, "#include \"../r_defs.h\"\n\n" );
+
+		extern int		numvertexes;
+		extern vertex_t*	vertexes;
+		extern int		numnodes;
+		extern node_t*	nodes;
+
+
+		#define BAKE_MAPS 9
+		int j;
+		const char * bakemaps[BAKE_MAPS+1] = { "E1M1", "E1M2", "E1M3", "E1M4", "E1M5", "E1M6", "E1M7", "E1M8", "E1M9", 0 };
+		int numvertexes_baked[BAKE_MAPS];
+		int numnodes_baked[BAKE_MAPS];
+		for( i = 0; i < BAKE_MAPS; i++ )
+		{
+			P_SetupLevel( 1, i+1, 0, 0 );
+
+			numvertexes_baked[i] = numvertexes;
+			numnodes_baked[i] = numnodes;
+
+			fprintf( bf, "static const vertex_t __vertexes%d[%d] = { ", i, numvertexes * sizeof( vertex_t ) );
+			for( j = 0; j < numvertexes * sizeof( vertex_t ); j++ )
+				fprintf( bf, " { 0x%08x, 0x%08x }, ",  vertexes[j].x, vertexes[j].y );
+			fprintf( bf, "};\n" );
+
+			fprintf( bf, "static const unsigned char __nodes%d[] = { ", i );
+			for( j = 0; j < numnodes * sizeof( node_t ); j++ )
+				fprintf( bf, "0x%02x, ",  ((unsigned char*)nodes)[j] );
+			fprintf( bf, "};\n" );
+		}
+
+
+
+		fprintf( bf, "const int numnodes_baked[] = { " );
+		for( i = 0; i < BAKE_MAPS; i++ )
+			fprintf( bf, "%d, ", numnodes_baked[i] );
+		fprintf( bf, " };\n" );
+
+		fprintf( bf, "const int numvertexes_baked[] = { " );
+		for( i = 0; i < BAKE_MAPS; i++ )
+			fprintf( bf, "%d, ", numvertexes_baked[i] );
+		fprintf( bf, " };\n" );
+
+		fprintf( bf, "const char * bakemaps[] = { " );
+		for( i = 0; i < BAKE_MAPS; i++ )
+			fprintf( bf, "\"%s\", ", bakemaps[i] );
+		fprintf( bf, "0 };\n" );
+
+		fprintf( bf, "const vertex_t* vertexes_baked[] = { " );
+		for( i = 0; i < BAKE_MAPS; i++ )
+			fprintf( bf, "__vertexes%d, ", i );
+		fprintf( bf, " };\n" );
+
+		fprintf( bf, "const node_t* nodes_baked[] = { " );
+		for( i = 0; i < BAKE_MAPS; i++ )
+			fprintf( bf, "(const node_t*)__nodes%d, ", i );
+		fprintf( bf, " };\n" );
+
+
+
+
+		fclose( bf );
+	}
+
+	exit(0);
+#endif
 
     D_DoomLoop ();  // never returns
 }

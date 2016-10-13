@@ -28,6 +28,7 @@ rcsid[] = "$Id: z_zone.c,v 1.4 1997/02/03 16:47:58 b1 Exp $";
 #include "i_system.h"
 #include "doomdef.h"
 
+static int usedram = 0;
 
 //
 // ZONE MEMORY ALLOCATION
@@ -123,7 +124,7 @@ void Z_Free (void* ptr)
 {
     memblock_t*		block;
     memblock_t*		other;
-	
+	printf( "Free: %p\n", ptr );
     block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
 
     if (block->id != ZONEID)
@@ -180,8 +181,19 @@ void Z_Free (void* ptr)
 #define MINFRAGMENT		64
 
 
+void*	Z_Malloc_Internal_Extended (int size, int tag, void *ptr, const char * fil, int line)
+{
+	void * ret;
+	usedram += size;
+	printf( "MALLOC: %d %d %p @ %s:%d -> %d ->", size, tag, ptr, fil, line, usedram );
+	fflush( stdout );
+	ret = Z_Malloc_Internal( size, tag, ptr );
+	printf( "%p\n", ret );
+	return ret;
+}
+
 void*
-Z_Malloc
+Z_Malloc_Internal
 ( int		size,
   int		tag,
   void*		user )

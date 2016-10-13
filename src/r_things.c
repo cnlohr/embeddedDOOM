@@ -185,17 +185,18 @@ void R_InitSpriteDefs (char** namelist)
     int		start;
     int		end;
     int		patched;
-		
+
     // count the number of sprite names
     check = namelist;
     while (*check != NULL)
-	check++;
+	{
+		check++;
+	}
 
     numsprites = check-namelist;
-	
     if (!numsprites)
 	return;
-		
+
     sprites = Z_Malloc(numsprites *sizeof(*sprites), PU_STATIC, NULL);
 	
     start = firstspritelump-1;
@@ -204,9 +205,11 @@ void R_InitSpriteDefs (char** namelist)
     // scan all the lump names for each of the names,
     //  noting the highest frame letter.
     // Just compare 4 characters as ints
+
     for (i=0 ; i<numsprites ; i++)
     {
 	spritename = namelist[i];
+
 	memset (sprtemp,-1, sizeof(sprtemp));
 		
 	maxframe = -1;

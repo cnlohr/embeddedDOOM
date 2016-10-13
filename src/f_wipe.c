@@ -46,6 +46,7 @@ static byte*	wipe_scr_start;
 static byte*	wipe_scr_end;
 static byte*	wipe_scr;
 
+#ifndef DISABLE_WIPES
 
 void
 wipe_shittyColMajorXform
@@ -233,6 +234,8 @@ wipe_exitMelt
     return 0;
 }
 
+#endif
+
 int
 wipe_StartScreen
 ( int	x,
@@ -258,6 +261,7 @@ wipe_EndScreen
     return 0;
 }
 
+#ifndef DISABLE_WIPES
 int
 wipe_ScreenWipe
 ( int	wipeno,
@@ -300,3 +304,20 @@ wipe_ScreenWipe
     return !go;
 
 }
+
+#else
+
+int
+wipe_ScreenWipe
+( int	wipeno,
+  int	x,
+  int	y,
+  int	width,
+  int	height,
+  int	ticks )
+{
+	//Normally, this would actually do a wipe effect. Ditched for size.
+	memcpy( screens[0], wipe_scr_end, width*height );
+	return 1;
+}
+#endif

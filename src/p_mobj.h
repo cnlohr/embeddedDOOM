@@ -220,7 +220,6 @@ typedef struct mobj_s
 
     //More drawing info: to determine current sprite.
     angle_t		angle;	// orientation
-    spritenum_t		sprite;	// used to find patch_t and flip value
     int			frame;	// might be ORed with FF_FULLBRIGHT
 
     // Interaction info, by BLOCKMAP.
@@ -244,44 +243,47 @@ typedef struct mobj_s
     fixed_t		momz;
 
     // If == validcount, already checked.
-    int			validcount;
+    short			validcount;
 
     mobjtype_t		type;
     mobjinfo_t*		info;	// &mobjinfo[mobj->type]
     
-    int			tics;	// state tic counter
-    state_t*		state;
-    int			flags;
-    int			health;
-
-    // Movement direction, movement generation (zig-zagging).
-    int			movedir;	// 0-7
-    int			movecount;	// when 0, select a new dir
-
     // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
     struct mobj_s*	target;
 
-    // Reaction time: if non 0, don't attack yet.
-    // Used by player to freeze a bit after teleporting.
-    int			reactiontime;   
-
-    // If >0, the target will be chased
-    // no matter what (even if shot)
-    int			threshold;
-
     // Additional info record for player avatars only.
     // Only valid if type == MT_PLAYER
     struct player_s*	player;
-
-    // Player number last looked for.
-    int			lastlook;	
 
     // For nightmare respawn.
     mapthing_t		spawnpoint;	
 
     // Thing being chased/attacked for tracers.
     struct mobj_s*	tracer;	
+
+
+    int			tics;	// state tic counter
+    state_t*		state;
+    int			flags;
+    short			health;
+
+    // Movement direction, movement generation (zig-zagging).
+    short			movecount;	// when 0, select a new dir
+
+    // Reaction time: if non 0, don't attack yet.
+    // Used by player to freeze a bit after teleporting.
+    short			reactiontime;   
+
+    // If >0, the target will be chased
+    // no matter what (even if shot)
+    short			threshold;
+
+    // Player number last looked for.
+    short			lastlook;	
+    unsigned char			movedir;	// 0-7
+    char	sprite;	// used to find patch_t and flip value //actually spritenum_t
+
     
 } mobj_t;
 

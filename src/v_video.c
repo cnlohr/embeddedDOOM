@@ -486,8 +486,14 @@ void V_Init (void)
 		
     // stick these in low dos memory on PCs
 
-    base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);
 
+#ifdef COMBINE_SCREENS
+    base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT);
+    for (i=0 ; i<4 ; i++)
+	screens[i] = base;// + i*SCREENWIDTH*SCREENHEIGHT;
+#else
+    base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);
     for (i=0 ; i<4 ; i++)
 	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+#endif
 }

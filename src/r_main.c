@@ -52,7 +52,7 @@ static const char rcsid[] = "$Id: r_main.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
 int			viewangleoffset;
 
 // increment every time a check is made
-int			validcount = 1;		
+short			validcount = 1;		
 
 
 lighttable_t*		fixedcolormap;
@@ -95,12 +95,16 @@ angle_t			clipangle;
 // maps the visible view angles to screen X coordinates,
 // flattening the arc to a flat projection plane.
 // There will be many angles mapped to the same X. 
+#ifdef GENERATE_BAKED
 int			viewangletox[FINEANGLES/2];
-
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
 angle_t			xtoviewangle[SCREENWIDTH+1];
+#else
+extern const int viewangletox[FINEANGLES/2];
+extern const angle_t	xtoviewangle[SCREENWIDTH+1];
+#endif
 
 
 // UNUSED.
@@ -110,7 +114,7 @@ angle_t			xtoviewangle[SCREENWIDTH+1];
 // fixed_t		finetangent[FINEANGLES/2];
 
 // fixed_t		finesine[5*FINEANGLES/4];
-fixed_t*		finecosine = &finesine[FINEANGLES/4];
+const fixed_t*		finecosine = &finesine[FINEANGLES/4];
 
 
 lighttable_t*		scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
@@ -556,7 +560,9 @@ void R_InitTextureMapping (void)
     //  so FIELDOFVIEW angles covers SCREENWIDTH.
     focallength = FixedDiv (centerxfrac,
 			    finetangent[FINEANGLES/4+FIELDOFVIEW/2] );
-	
+
+	#ifdef GENERATE_BAKED
+
     for (i=0 ; i<FINEANGLES/2 ; i++)
     {
 	if (finetangent[i] > FRACUNIT*2)
@@ -598,7 +604,7 @@ void R_InitTextureMapping (void)
 	else if (viewangletox[i] == viewwidth+1)
 	    viewangletox[i]  = viewwidth;
     }
-	
+	#endif
     clipangle = xtoviewangle[0];
 }
 

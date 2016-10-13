@@ -41,16 +41,29 @@
 //
 
 // needed for texture pegging
+#ifdef GENERATE_BAKED
 extern fixed_t*		textureheight;
+#else
+extern const fixed_t		textureheight[];
+#endif
 
 // needed for pre rendering (fracs)
+#ifdef GENERATE_BAKED
 extern fixed_t*		spritewidth;
-
 extern fixed_t*		spriteoffset;
 extern fixed_t*		spritetopoffset;
+#else
+extern const fixed_t	spritewidth[];	
+extern const fixed_t	spriteoffset[];
+extern const fixed_t	spritetopoffset[];
+#endif
 
+#ifdef GENERATE_BAKED
 extern lighttable_t*	colormaps;
-
+extern int colormapsize;
+#else
+extern const lighttable_t	colormaps[];
+#endif
 extern int		viewwidth;
 extern int		scaledviewwidth;
 extern int		viewheight;
@@ -63,38 +76,43 @@ extern int*		texturetranslation;
 
 
 // Sprite....
+#ifdef GENERATE_BAKED
 extern int		firstspritelump;
 extern int		lastspritelump;
-extern int		numspritelumps;
-
+#else
+extern const int		firstspritelump;
+extern const int		lastspritelump;
+#endif
 
 
 //
 // Lookup tables for map data.
 //
+
 extern int		numsprites;
+
 extern spritedef_t*	sprites;
-
-extern int		numvertexes;
-extern vertex_t*	vertexes;
-
-extern int		numsegs;
-extern seg_t*		segs;
-
-extern int		numsectors;
+extern side_t*		sides;
 extern sector_t*	sectors;
-
-extern int		numsubsectors;
 extern subsector_t*	subsectors;
-
-extern int		numnodes;
-extern node_t*		nodes;
-
-extern int		numlines;
+extern seg_t*		segs;
 extern line_t*		lines;
 
 extern int		numsides;
-extern side_t*		sides;
+extern int		numlines;
+extern int		numnodes;
+extern int		numsubsectors;
+extern int		numsectors;
+extern int		numsegs;
+extern int		numvertexes;
+
+#ifdef GENERATE_BAKED
+extern vertex_t*	vertexes;
+extern node_t*		nodes;
+#else
+extern const vertex_t*	vertexes;
+extern const node_t*		nodes;
+#endif
 
 
 //
@@ -111,8 +129,13 @@ extern player_t*	viewplayer;
 // ?
 extern angle_t		clipangle;
 
+#ifdef GENERATE_BAKED
 extern int		viewangletox[FINEANGLES/2];
 extern angle_t		xtoviewangle[SCREENWIDTH+1];
+#else
+extern const int		viewangletox[FINEANGLES/2];
+extern const angle_t		xtoviewangle[SCREENWIDTH+1];
+#endif
 //extern fixed_t		finetangent[FINEANGLES/2];
 
 extern fixed_t		rw_distance;

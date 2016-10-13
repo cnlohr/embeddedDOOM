@@ -73,7 +73,7 @@ int		columnofs[MAXWIDTH];
 //  translate a limited part to another
 //  (color ramps used for  suit colors).
 //
-byte		translations[3][256];	
+//byte		translations[3][256];	
  
  
 
@@ -380,7 +380,11 @@ void R_DrawFuzzColumn (void)
 //  identical sprites, kinda brightened up.
 //
 byte*	dc_translation;
+#ifdef GENERATE_BAKED
 byte*	translationtables;
+#else
+extern const byte	translationtables[];
+#endif
 
 void R_DrawTranslatedColumn (void) 
 { 
@@ -458,6 +462,7 @@ void R_DrawTranslatedColumn (void)
 //
 void R_InitTranslationTables (void)
 {
+#ifdef GENERATE_BAKED
     int		i;
 	
     translationtables = Z_Malloc (256*3+255, PU_STATIC, 0);
@@ -480,6 +485,7 @@ void R_InitTranslationTables (void)
 		= translationtables[i+512] = i;
 	}
     }
+#endif
 }
 
 

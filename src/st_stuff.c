@@ -1463,9 +1463,11 @@ void ST_Stop (void)
     st_stopped = true;
 }
 
+unsigned char static_screen_4[ST_WIDTH*ST_HEIGHT];
+
 void ST_Init (void)
 {
     veryfirsttime = 0;
     ST_loadData();
-    screens[4] = (byte *) Z_Malloc(ST_WIDTH*ST_HEIGHT, PU_STATIC, 0);
+    screens[4] = static_screen_4; //(byte *) Z_Malloc(ST_WIDTH*ST_HEIGHT, PU_STATIC, 0);
 }

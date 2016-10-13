@@ -276,7 +276,7 @@ default_t	defaults[] =
     {"joyb_use",&joybuse,3},
     {"joyb_speed",&joybspeed,2},
 
-    {"screenblocks",&screenblocks, 9},
+    {"screenblocks",&screenblocks, 10},
     {"detaillevel",&detailLevel, 0},
 
     {"snd_channels",&numChannels, 3},
@@ -299,7 +299,7 @@ default_t	defaults[] =
 };
 
 int	numdefaults;
-char*	defaultfile;
+//char*	defaultfile;
 
 
 //
@@ -309,8 +309,8 @@ void M_SaveDefaults (void)
 {
     int		i;
     int		v;
+/*
     FILE*	f;
-	
     f = fopen (defaultfile, "w");
     if (!f)
 	return; // can't write the file, but don't complain
@@ -329,6 +329,7 @@ void M_SaveDefaults (void)
     }
 	
     fclose (f);
+*/
 }
 
 
@@ -352,7 +353,7 @@ void M_LoadDefaults (void)
     numdefaults = sizeof(defaults)/sizeof(defaults[0]);
     for (i=0 ; i<numdefaults ; i++)
 	*defaults[i].location = defaults[i].defaultvalue;
-    
+/*
     // check for a custom default file
     i = M_CheckParm ("-config");
     if (i && i<myargc-1)
@@ -399,7 +400,7 @@ void M_LoadDefaults (void)
 	}
 		
 	fclose (f);
-    }
+    }*/
 }
 
 

@@ -6,89 +6,101 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -DNORMALUNIX -DLINUX # -DUSEASM 
-LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lXext -lX11 -lnsl -lm
+CFLAGS= -m32 -O0 -g -w -flto -DNORMALUNIX -DLINUX # -DUSEASM 
+LDFLAGS=-L/usr/X11R6/lib $(CFLAGS)
+LIBS=-lXext -lX11 -lnsl -lm -lpthread
 
+BAKED:=support/rawwad.o support/baked_texture_data.o support/baked_map_data.o
 # subdirectory for objects
 O=linux
 
 # not too sophisticated dependency
-OBJS=				\
-		$(O)/doomdef.o		\
-		$(O)/doomstat.o		\
-		$(O)/dstrings.o		\
-		$(O)/i_system.o		\
-		$(O)/i_sound.o		\
-		$(O)/i_video.o		\
-		$(O)/i_net.o			\
-		$(O)/tables.o			\
-		$(O)/f_finale.o		\
-		$(O)/f_wipe.o 		\
-		$(O)/d_main.o			\
-		$(O)/d_net.o			\
-		$(O)/d_items.o		\
-		$(O)/g_game.o			\
-		$(O)/m_menu.o			\
-		$(O)/m_misc.o			\
-		$(O)/m_argv.o  		\
-		$(O)/m_bbox.o			\
-		$(O)/m_fixed.o		\
-		$(O)/m_swap.o			\
-		$(O)/m_cheat.o		\
-		$(O)/m_random.o		\
-		$(O)/am_map.o			\
-		$(O)/p_ceilng.o		\
-		$(O)/p_doors.o		\
-		$(O)/p_enemy.o		\
-		$(O)/p_floor.o		\
-		$(O)/p_inter.o		\
-		$(O)/p_lights.o		\
-		$(O)/p_map.o			\
-		$(O)/p_maputl.o		\
-		$(O)/p_plats.o		\
-		$(O)/p_pspr.o			\
-		$(O)/p_setup.o		\
-		$(O)/p_sight.o		\
-		$(O)/p_spec.o			\
-		$(O)/p_switch.o		\
-		$(O)/p_mobj.o			\
-		$(O)/p_telept.o		\
-		$(O)/p_tick.o			\
-		$(O)/p_saveg.o		\
-		$(O)/p_user.o			\
-		$(O)/r_bsp.o			\
-		$(O)/r_data.o			\
-		$(O)/r_draw.o			\
-		$(O)/r_main.o			\
-		$(O)/r_plane.o		\
-		$(O)/r_segs.o			\
-		$(O)/r_sky.o			\
-		$(O)/r_things.o		\
-		$(O)/w_wad.o			\
-		$(O)/wi_stuff.o		\
-		$(O)/v_video.o		\
-		$(O)/st_lib.o			\
-		$(O)/st_stuff.o		\
-		$(O)/hu_stuff.o		\
-		$(O)/hu_lib.o			\
-		$(O)/s_sound.o		\
-		$(O)/z_zone.o			\
-		$(O)/info.o				\
-		$(O)/sounds.o
+CS=				\
+		doomdef.c \
+		doomstat.c \
+		dstrings.c \
+		i_system.c		\
+		i_video.c		\
+		tables.c			\
+		f_finale.c		\
+		f_wipe.c 		\
+		d_main.c			\
+		d_items.c		\
+		g_game.c			\
+		m_menu.c			\
+		m_misc.c			\
+		m_argv.c  		\
+		m_bbox.c			\
+		m_fixed.c		\
+		m_swap.c			\
+		m_cheat.c		\
+		m_random.c		\
+		am_map.c			\
+		p_ceilng.c		\
+		p_doors.c		\
+		p_enemy.c		\
+		p_floor.c		\
+		p_inter.c		\
+		p_lights.c		\
+		p_map.c			\
+		p_maputl.c		\
+		p_plats.c		\
+		p_pspr.c			\
+		p_setup.c		\
+		p_sight.c		\
+		p_spec.c			\
+		p_switch.c		\
+		p_mobj.c			\
+		p_telept.c		\
+		p_tick.c			\
+		p_saveg.c		\
+		p_user.c			\
+		r_bsp.c			\
+		r_data.c			\
+		r_draw.c			\
+		r_main.c			\
+		r_plane.c		\
+		r_segs.c			\
+		r_sky.c			\
+		r_things.c		\
+		w_wad.c			\
+		wi_stuff.c		\
+		v_video.c		\
+		st_lib.c			\
+		st_stuff.c		\
+		hu_stuff.c		\
+		hu_lib.c			\
+		z_zone.c			\
+		info.c				\
+		os_generic.c	\
+		XDriver.c \
+		DrawFunctions.c \
+		i_net.c			\
+		d_net.c			\
+		stubs.c
 
-all:	 $(O)/linuxxdoom
+#		sounds.c	\
+#		s_sound.c		\
+#		i_sound.c		\
+
+all:	 linuxxdoom
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f linux/*
+	rm -f linuxxdoom linuxxdoom.gentables $(BAKED)
 
-$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
-	-o $(O)/linuxxdoom $(LIBS)
+linuxxdoom:	$(CS) i_main.c $(BAKED)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o linuxxdoom $(LIBS)
 
-$(O)/%.o:	%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+linuxxdoomsize :
+	nm --print-size --size-sort --radix=d linuxxdoom  | grep -v " r " | grep -v " R "
+	size linuxxdoom -A
+
+linuxxdoom.gentables:	$(CS) i_main.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o linuxxdoom.gentables $(LIBS) support/rawwad.o -DGENERATE_BAKED
+
+
+
 
 #############################################################
 #

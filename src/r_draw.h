@@ -75,7 +75,11 @@ extern fixed_t		ds_ystep;
 // start of a 64*64 tile image
 extern byte*		ds_source;		
 
+#ifdef GENERATE_BAKED
 extern byte*		translationtables;
+#else
+extern const byte		translationtables[];
+#endif
 extern byte*		dc_translation;
 
 
