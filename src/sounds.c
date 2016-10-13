@@ -30,6 +30,8 @@ rcsid[] = "$Id: sounds.c,v 1.3 1997/01/29 22:40:44 b1 Exp $";
 #include "doomtype.h"
 #include "sounds.h"
 
+#ifndef STUB_SOUND
+
 //
 // Information about all the music
 //
@@ -225,4 +227,6 @@ sfxinfo_t S_sfx[] =
   { "skeatk", false, 70, 0, -1, -1, 0 },
   { "radio", false, 60, 0, -1, -1, 0 } 
 };
+
+#endif
 

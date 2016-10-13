@@ -4,6 +4,9 @@
 #
 # $Log:$
 #
+
+HOSTGCC=gcc
+
 CC=  gcc  # gcc or g++
 
 CFLAGS= -m32 -O0 -g -w -flto -DNORMALUNIX -DLINUX # -DUSEASM 
@@ -77,29 +80,43 @@ CS=				\
 		DrawFunctions.c \
 		i_net.c			\
 		d_net.c			\
-		stubs.c
+		stubs.c    \
+		sounds.c	\
+		s_sound.c		\
+		i_sound.c
 
-#		sounds.c	\
-#		s_sound.c		\
-#		i_sound.c		\
+all:	 emdoom
 
-all:	 linuxxdoom
+emdoom:	$(CS) i_main.c $(BAKED)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom $(LIBS)
+
+support/baked_texture_data.c : emdoom.gentables
+	./emdoom.gentables
+
+support/baked_map_data.c : emdoom.gentables
+	./emdoom.gentables
+
+support/wadder : support/wadder.c
+	$(HOSTGCC) -o $@ $^
+
+support/rawwad.c : support/wadder
+	(cd support;./wadder;cd ..)
+
+support/rawwad.o : support/rawwad.c
+	$(CC) $(CFLAGS) -c -o tmp.o $^
+	mv tmp.o $@
+
+emdoom.size :
+	nm --print-size --size-sort --radix=d emdoom  | grep -v " r " | grep -v " R "
+	size emdoom -A
+
+emdoom.gentables : $(CS) i_main.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom.gentables $(LIBS) support/rawwad.o -DGENERATE_BAKED
+
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f linuxxdoom linuxxdoom.gentables $(BAKED)
-
-linuxxdoom:	$(CS) i_main.c $(BAKED)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o linuxxdoom $(LIBS)
-
-linuxxdoomsize :
-	nm --print-size --size-sort --radix=d linuxxdoom  | grep -v " r " | grep -v " R "
-	size linuxxdoom -A
-
-linuxxdoom.gentables:	$(CS) i_main.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o linuxxdoom.gentables $(LIBS) support/rawwad.o -DGENERATE_BAKED
-
-
+	rm -f emdoom emdoom.gentables $(BAKED) support/wadder
 
 
 #############################################################

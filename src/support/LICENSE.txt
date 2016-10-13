@@ -1,0 +1,23 @@
+# doom1.wad included
+
+It is important to use the same doom1.wad because all of the baked textures, etc. were compiled agains this one.
+
+
+X-Sender: johnc@mail.idsoftware.com
+X-Mailer: Windows Eudora Pro Version 3.0 (32)
+Date: Sat, 23 Oct 1999 20:01:30 -0500
+To: Joe Drew 
+From: johnc@idsoftware.com (John Carmack)
+Subject: Re: Doom shareware WAD license
+
+At 08:02 PM 10/23/99 -0400, you wrote:
+>Can you give me a definite license on the doom 1 shareware wad? I find certain
+>things that say "freely distribute" and others that say "get vendor's license"
+>... All I need to have is a license so I can package it up for Debian.
+>Thanks.
+>Joe
+
+The DOOM shareware wad is freely distributable.  No Quake data is freely
+distributable.
+
+John Carmack

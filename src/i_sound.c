@@ -58,6 +58,8 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 
 #include "doomdef.h"
 
+#ifndef STUB_SOUND
+
 // UNIX hack, to be removed.
 #ifdef SNDSERV
 // Separate sound server process.
@@ -240,7 +242,7 @@ getsfx
         paddedsfx[i] = 128;
 
     // Remove the cached lump.
-    Z_Free( sfx );
+    //Z_Free( sfx );
     
     // Preserve padded length.
     *len = paddedsize;
@@ -771,7 +773,7 @@ I_InitSound()
     fprintf(stderr, "Could not open /dev/dsp\n");
   
                      
-  i = 11 | (2<<16);                                           
+/*  i = 11 | (2<<16);                                           
   myioctl(audio_fd, SNDCTL_DSP_SETFRAGMENT, &i);
   myioctl(audio_fd, SNDCTL_DSP_RESET, 0);
   
@@ -788,7 +790,7 @@ I_InitSound()
     myioctl(audio_fd, SNDCTL_DSP_SETFMT, &i);
   else
     fprintf(stderr, "Could not play signed 16 data\n");
-
+*/
   fprintf(stderr, " configured audio device\n" );
 
     
@@ -982,3 +984,5 @@ void I_SoundDelTimer()
   if ( I_SoundSetTimer( 0 ) == -1)
     fprintf( stderr, "I_SoundDelTimer: failed to remove interrupt. Doh!\n");
 }
+
+#endif

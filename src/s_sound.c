@@ -43,6 +43,7 @@ rcsid[] = "$Id: s_sound.c,v 1.6 1997/02/03 22:45:12 b1 Exp $";
 
 #include "doomstat.h"
 
+#ifndef STUB_SOUND
 
 // Purpose?
 const char snd_prefixen[]
@@ -876,4 +877,4 @@ S_getChannel
 
 
 
-
+#endif

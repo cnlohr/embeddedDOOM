@@ -72,6 +72,7 @@ ticcmd_t*	I_BaseTiccmd(void)
     return &emptycmd;
 }
 
+unsigned char DOOMHeap[FIXED_HEAP];
 
 int  I_GetHeapSize (void)
 {
@@ -80,9 +81,8 @@ int  I_GetHeapSize (void)
 
 byte* I_ZoneBase (int*	size)
 {
-	printf( "I_ZONE: %d\n", mb_used );
     *size = FIXED_HEAP; //mb_used*1024*1024;
-    return (byte *) malloc (*size);
+    return (byte *) DOOMHeap;
 }
 
 
@@ -137,7 +137,7 @@ void I_WaitVBL(int count)
 #ifdef SUN
     sleep(0);
 #else
-    usleep (count * (1000000/70) );                                
+    usleep (count * (1000000/700) );                                
 #endif
 #endif
 }

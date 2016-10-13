@@ -14,16 +14,19 @@
 #ifdef GENERATE_BAKED
 #define FIXED_HEAP 40000000 //Heap size when running on computer to store full size.
 #else
-#define FIXED_HEAP (200*1024)   //Actual heap for embedded device.
+#define FIXED_HEAP (384*1024)   //Actual heap for embedded device.
 #endif
 
 
+//Always stub sound, right now the existing system takes up like 1.5MB of heap!
+#define STUB_SOUND
 
-//#define D_QuitNetGame(v)
-//#define NetUpdate(v)
 
+
+#ifdef STUB_SOUND
 #define S_StartSound( dev, sound )
 #define S_ChangeMusic( musnum, id)
+#define I_UpdateSound(x)
 #define I_ShutdownSound(x)
 #define I_ShutdownMusic(x)
 #define S_PauseSound(x)
@@ -37,7 +40,7 @@
 #define S_Init(x,y)
 #define S_Start(x)
 #define  S_StopSound(x)
-
+#endif
 
 
 

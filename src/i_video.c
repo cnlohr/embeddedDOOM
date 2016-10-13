@@ -31,26 +31,9 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <errno.h>
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/keysym.h>
-
-#include <X11/extensions/XShm.h>
-// Had to dig up XShm.c for this one.
-// It is in the libXext, but not in the XFree86 headers.
-#ifdef LINUX
-int XShmGetEventBase( Display* dpy ); // problems with g++?
-#endif
-
-#include <stdarg.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
 #include <netinet/in.h>
 #include <signal.h>
-
 #include "doomstat.h"
 #include "i_system.h"
 #include "v_video.h"
