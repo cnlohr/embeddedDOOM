@@ -9,7 +9,7 @@ HOSTGCC=gcc
 
 CC=  gcc  # gcc or g++
 
-CFLAGS= -m32 -O0 -g -w -flto -DNORMALUNIX -DLINUX # -DUSEASM 
+CFLAGS= -m32 -O1 -g -w -flto -DNORMALUNIX -DLINUX # -DUSEASM 
 LDFLAGS=-L/usr/X11R6/lib $(CFLAGS)
 LIBS=-lXext -lX11 -lnsl -lm -lpthread
 
@@ -110,8 +110,8 @@ emdoom.size : emdoom
 	nm --print-size --size-sort --radix=d emdoom  | grep -v " r " | grep -v " R "
 	size emdoom -A
 
-emdoom.gentables : $(CS) i_main.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom.gentables $(LIBS) support/rawwad.o -DGENERATE_BAKED
+emdoom.gentables : i_main.c support/rawwad.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom.gentables $(LIBS) -DGENERATE_BAKED $(CS)
 
 
 clean:
