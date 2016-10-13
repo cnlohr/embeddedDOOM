@@ -11,12 +11,17 @@ WARNING: This repository uses LFS to store the Shareware.  You will need to do a
 TODO: Write more here!
 
 Right now, it uses (on -m32 / linux): 
- * .bss: 172,852 bytes
+ * .bss: 172,780 bytes
  * .bss:  + DOOM Heap (Some levels take more than others, E1M6 takes ~280kB, E1M1 takes ~107kB -- configurable in stubs.h -- variable is DOOMHeap)
- * .data: 57,412 bytes
- * .text: 176,899 bytes
- * .rodata: 5,699,089 bytes
+ * .data: 45,600 bytes
+ * .text: 123,858 bytes
+ * .rodata: 5,690,440 bytes
 
+## Btw
+
+Use ```./emdoom -warp 1 #``` where # is the map # (1 to 9)
+
+I cut out screen transitions because it took an extra 64kB on the Heap!
 
 ## Files of interest
 
@@ -31,3 +36,12 @@ To see memory usage:
 
  * Type "make emdoom.size" - it'll show you a list of all of the DATA, BSS and TEXT items, increasing in size (second column) as well as size of all sections.  You probably care about .text, .rodata, .data and .bss.
 
+## TODO:
+
+Figure out how to separate out things like the lines and line segments into rodata and .data/.bss.
+
+## To port
+
+Edit i_video.c
+Edit i_system.c
+Configure stubs.h to your liking.
