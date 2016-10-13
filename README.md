@@ -6,7 +6,7 @@ The first rev of this is lifted directly from https://github.com/id-Software/DOO
 
 This is specifically targeted for the shareware version of DOOM, and rips out a few features here and there in favor of being as small (RAM-wise) as possible.s
 
-WARNING: This repository uses LFS to store the Shareware.  You will need to do a ```git lfs fetch``` in the firmware folder to get it updated.
+WARNING: This repository uses LFS to store the Shareware.  You will need to do a ```git lfs fetch``` in the firmware folder to get it updated.  Somtimes something goes wrong with it and you have to ```git lfs install --force;git lfs pull```
 
 TODO: Write more here!
 
