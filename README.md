@@ -10,6 +10,12 @@ WARNING: This repository uses LFS to store the Shareware.  You will need to do a
 
 TODO: Write more here!
 
+Right now, it uses (on -m32 / linux): 
+ * .bss: 172,852 bytes
+ * .bss:  + DOOM Heap (Some levels take more than others, E1M6 takes ~280kB, E1M1 takes ~107kB.)
+ * .data: 57,412 bytes
+ * .text: 176,899 bytes
+ * .rodata: 5,699,089 bytes
 
 
 ## Files of interest
