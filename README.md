@@ -25,7 +25,7 @@ Right now, it uses (on -m32 / linux):
 
 ## Building, etc.
 
-  * Type "make"
+  * Type "make" -- this builds the .wad into a .c, and into the target arch's .o.  Then, it builds doom with that and a very large heap.  It runs it once to generate all of the tables used for various things.  It then writes those tables to .c files in the support/ folder... Which it compiles into target arch .o's.  These .o's are linked in to provide the tables needed in .ro so they aren't taking up prescious ram.
 
 To see memory usage:
 
