@@ -106,7 +106,7 @@ support/rawwad.o : support/rawwad.c
 	$(CC) $(CFLAGS) -c -o tmp.o $^
 	mv tmp.o $@
 
-emdoom.size :
+emdoom.size : emdoom
 	nm --print-size --size-sort --radix=d emdoom  | grep -v " r " | grep -v " R "
 	size emdoom -A
 
