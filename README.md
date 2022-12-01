@@ -8,14 +8,18 @@ This is specifically targeted for the shareware version of DOOM, and rips out a 
 
 WARNING: This repository uses LFS to store the Shareware.  You will need to do a ```git lfs fetch``` in the firmware folder to get it updated.  Somtimes something goes wrong with it and you have to ```git lfs install --force;git lfs pull```
 
-TODO: Write more here!
-
 Right now, it uses (on -m32 / linux): 
  * .bss: 172,780 bytes
  * .bss:  + DOOM Heap (Some levels take more than others, E1M6 takes ~280kB, E1M1 takes ~107kB -- configurable in stubs.h -- variable is DOOMHeap)
  * .data: 45,600 bytes
  * .text: 123,858 bytes
  * .rodata: 5,690,440 bytes
+
+## For installing on x64
+
+```
+sudo apt-get install gcc-multilib libx11-dev:i386
+```
 
 ## Btw
 
