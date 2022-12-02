@@ -9,28 +9,38 @@ This is specifically targeted for the shareware version of DOOM, and rips out a 
 WARNING: This repository uses LFS to store the Shareware.  You will need to do a ```git lfs fetch``` in the firmware folder to get it updated.  Somtimes something goes wrong with it and you have to ```git lfs install --force;git lfs pull```
 
 Right now, it uses (on -m32 / linux): 
- * .bss: 172,780 bytes
- * .bss:  + DOOM Heap (Some levels take more than others, E1M6 takes ~280kB, E1M1 takes ~107kB -- configurable in stubs.h -- variable is DOOMHeap)
+ * .bss: 170,992 bytes + DOOM Heap (recommend 294,912 if possible, can use as little as 120kB for E1M1)
+   * DOOM Heap: Some levels take more than others, E1M6 takes ~280kB, E1M1 takes ~107kB
+   * Configurable in stubs.h -- variable is DOOMHeap
+   * Framebuffer lives in this space.  It's `CombinedScreens` -- Note: This is not the normal behavior, normally DOOM Keeps 4 copies of each screen, but we just lie and alias all 4 copies.  It does mean you can't get the blood transitions between levels and the end screens get a tad sloppy.
  * .data: 45,600 bytes
- * .text: 123,858 bytes
- * .rodata: 5,690,440 bytes
+ * .text: 109,608 bytes
+ * .rodata: 5,685,632 bytes -- Includes the WAD files.
+
+Also, this build requires no file I/O had has highly customizable user input and video output.
+
+So, theoretically, you could run this on a system with only 384kB RAM.
 
 ## For installing on x64
 
+Because DOOM (in its current state is 32-bit ONLY, you can only compile to 32-bit targets.  This is OK though, since the Makefile includes `-m32`, but you must install the 32-bit compat libs with the following:
+
 ```
-sudo apt-get install gcc-multilib libx11-dev:i386
+sudo apt-get install gcc-multilib libx11-dev:i386 libxext-dev:i386
 ```
 
 ## Btw
 
-Use ```./emdoom -warp 1 #``` where # is the map # (1 to 9)
+Use ```./emdoom -warp 1 2``` where second number is the map # (1 to 9)
 
 I cut out screen transitions because it took an extra 64kB on the Heap!
 
 ## Files of interest
 
-  * stubs.h/.c is where most of the control for the pairin
-  * i_*.c has al the interface files for a host system.
+ * stubs.h/.c is where most of the control for the pairin
+ * doomdef.h - just has some useful bits.
+ * i_*.c has al the interface files for a host system.
+ * Check out if the configuration of COMBINE_SCREENS is what you want.  It controls how the screen memory is allocated.
 
 ## Building, etc.
 
@@ -42,7 +52,8 @@ To see memory usage:
 
 ## TODO:
 
-Figure out how to separate out things like the lines and line segments into rodata and .data/.bss.
+ * Figure out how to separate out things like the lines and line segments into rodata and .data/.bss.
+ * Figure out how to change screen size successfully.
 
 ## To port
 

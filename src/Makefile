@@ -7,27 +7,26 @@
 
 HOSTGCC=gcc
 
-CC=  gcc  # gcc or g++
-CC_HOST = gcc
+CC?=gcc  # gcc or g++
+CC_HOST?=gcc
 # 
-CFLAGS:=-m32 -O1 -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DDISABLE_NETWORK  # -DUSEASM 
-LDFLAGS:=-L/usr/X11R6/lib $(CFLAGS)
-LIBS:=-lXext -lX11 -lnsl -lm -lpthread
-CFLAGS_HOST:= $(CFLAGS)
-LDFLAGS_HOST:=-L/usr/X11R6/lib
-LIBS_HOST:=-lXext -lX11 -lnsl -lm -lpthread
-CS:=i_video_console.c
+CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
+LDFLAGS?=-L/usr/X11R6/lib -Wl,--gc-sections $(CFLAGS)
+LIBS?=-lXext -lX11 -lnsl -lm -lpthread
+CFLAGS_HOST?=$(CFLAGS)
+LDFLAGS_HOST?=-L/usr/X11R6/lib
+LIBS_HOST?=-lXext -lX11 -lnsl -lm -lpthread
+CS?=i_video.c
 
 #CFLAGS_FINAL:=$(CFLAGS)
 #CFLAGS_FINAL+=-DFIXED_HEAP=262144
 #CS:=i_video.c
 
-# if you need to do low-level memory debugging.
+# if you need to do low-level memory debugging.  This will help find things like out-of-array writing.
 CFLAGS_HOST+=-fsanitize=address -static-libasan -g
 
 # For RISC-V
-#CFLAGS:=-fno-stack-protector -static-libgcc -fdata-sections -ffunction-sections -g -Os -march=rv32ima -mabi=ilp32 -static -I/usr/include -DRV32IMA_BUILD -DDISABLE_NETWORK
-#CFLAGS_HOST+=
+#CFLAGS:=-fno-stack-protector -static-libgcc -fdata-sections -ffunction-sections -g -Os -march=rv32ima -mabi=ilp32 -static -I/usr/include -DRV32IMA_BUILD -DDISABLE_NETWORK -I/usr/include
 #LDFLAGS:= -T flatfile-rv32ima.lds -nostdlib -Wl,--gc-sections
 #LIBS:=
 #SUPPORT_FILES:=startup.S
@@ -122,8 +121,9 @@ support/baked_texture_data.o : support/baked_texture_data.c
 support/wadder : support/wadder.c
 	$(HOSTGCC) -o $@ $^
 
-support/rawwad.c : support/wadder
-	(cd support;./wadder;cd ..)
+# Don't normally need to do this, so it's hidden from the steps.
+#support/rawwad.c : support/wadder
+#	(cd support;./wadder;cd ..)
 
 support/rawwad.o : support/rawwad.c
 	$(CC) $(CFLAGS) -c -o tmp.o $^

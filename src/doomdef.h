@@ -92,11 +92,6 @@ typedef enum
 //#define X11_DGA		1
 
 
-//
-// For resize of screen, at start of game.
-// It will not work dynamically, see visplanes.
-//
-#define	BASE_WIDTH		320
 
 // It is educational but futile to change this
 //  scaling e.g. to 2. Drawing of status bar,
@@ -115,6 +110,12 @@ typedef enum
 #define SCREENHEIGHT 200
 //(int)(SCREEN_MUL*BASE_WIDTH*INV_ASPECT_RATIO) //200
 #endif
+
+//
+// For resize of screen, at start of game.
+// It will not work dynamically, see visplanes.
+//
+#define	BASE_WIDTH		SCREENWIDTH
 
 
 

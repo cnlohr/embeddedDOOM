@@ -1,28 +1,4 @@
-//Stubbed Video.c
-
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-//
-// This source is available for distribution and/or modification
-// only under the terms of the DOOM Source Code License as
-// published by id Software. All rights reserved.
-//
-// The source is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
-// for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM graphics stuff for X11, UNIX.
-//
-//-----------------------------------------------------------------------------
-
+//Stubbed Video.c, for terminals
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -354,9 +330,17 @@ void I_StartTic (void)
 	if( IsKBHit() )
 	{
 		event.type = ev_keydown;
-		event.data1 = ReadKBByte();
-		
-		if( event.data1 == 10 ) event.data1 = KEY_ENTER;
+		int hit =  ReadKBByte();
+		switch( hit )
+		{
+		case 10: hit = KEY_ENTER; break;
+		case 'A': case 'a': hit = KEY_LEFTARROW; break;
+		case 'S': case 's': hit = KEY_DOWNARROW; break;
+		case 'D': case 'd': hit = KEY_RIGHTARROW; break;
+		case 'W': case 'w': hit = KEY_UPARROW; break;
+		case '/': hit = KEY_RCTRL; break;
+		}
+		event.data1 = hit;
 		D_PostEvent(&event);
 		downmap[(uint8_t)event.data1] = 10;
 		printf( "DOWN %d\n", event.data1 );
@@ -428,6 +412,8 @@ void I_FinishUpdate (void)
 	*/
 	static int lscreenw = SCREENWIDTH/2;
 	static int lscreenh = SCREENHEIGHT/4;
+	static int lastcolor1 = -1;
+	static int lastcolor2 = -1;
 #if 1
 	int x, y;
 	for( y = 0; y < lscreenh; y++ )
@@ -438,8 +424,14 @@ void I_FinishUpdate (void)
 		{
 			int lx = x * SCREENWIDTH / lscreenw;
 			int col = screens[0][ lx+ly*SCREENWIDTH];
-			int selcolor = (lpalette[col*3+0]>100) | (lpalette[col*3+1]>100)*2 | (lpalette[col*3+2]>100)*4;
-			printf( "\x1b[4%dm%c", selcolor, '0' + col/4 );
+			int r = lpalette[col*3+0]+32;
+			int g = lpalette[col*3+1]+32;
+			int b = lpalette[col*3+2]+32;
+			int selcolor1 = (!!(r&128)) | (!!(g&128))*2 | (!!(b&128))*4;
+			int selcolor2 = (!!(r&64)) | (!!(g&64))*2 | (!!(b&64))*4;
+			if( selcolor1 != lastcolor1 ) { printf( "\x1b[4%dm", selcolor1 ); lastcolor1 = selcolor1; }
+			if( selcolor2 != lastcolor2 ) { printf( "\x1b[3%dm", selcolor2 ); lastcolor2 = selcolor2; }
+			printf( "%c", '0' + col/4 );
 		}
 	}
 	fflush( stdout );

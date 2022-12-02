@@ -1348,7 +1348,9 @@ void G_DoNewGame (void)
     netdemo = false;
     netgame = false;
     deathmatch = false;
-    playeringame[1] = playeringame[2] = playeringame[3] = 0;
+	int j;
+	for( j = 1; j < MAXPLAYERS; j++ )
+	    playeringame[j] = 0;
     respawnparm = false;
     fastparm = false;
     nomonsters = false;
