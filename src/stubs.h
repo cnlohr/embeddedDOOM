@@ -2,6 +2,9 @@
 #define TUNE_MAXOPENINGS	SCREENWIDTH*16
 #define STUB_NET
 
+#ifndef SET_MEMORY_DEBUG
+#define SET_MEMORY_DEBUG 1 // For printing free RAM.
+#endif
 
 #define COMBINE_SCREENS //Overlap memory for screens #0-3, saves RAM would mess up wipes, but we don't care.
 

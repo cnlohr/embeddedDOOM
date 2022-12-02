@@ -33,9 +33,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#ifndef LINUX
-#include <sys/filio.h>
-#endif
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -59,6 +56,11 @@
 #include "doomdef.h"
 
 #ifndef STUB_SOUND
+
+
+#ifndef LINUX
+#include <sys/filio.h>
+#endif
 
 // UNIX hack, to be removed.
 #ifdef SNDSERV

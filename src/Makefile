@@ -5,7 +5,7 @@
 # $Log:$
 #
 
-HOSTGCC=gcc
+HOSTGCC?=gcc
 
 CC?=gcc  # gcc or g++
 CC_HOST?=gcc
@@ -13,7 +13,7 @@ CC_HOST?=gcc
 CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
 LDFLAGS?=-L/usr/X11R6/lib -Wl,--gc-sections $(CFLAGS)
 LIBS?=-lXext -lX11 -lnsl -lm -lpthread
-CFLAGS_HOST?=$(CFLAGS)
+CFLAGS_HOST?=-m32
 LDFLAGS_HOST?=-L/usr/X11R6/lib
 LIBS_HOST?=-lXext -lX11 -lnsl -lm -lpthread
 CS?=i_video.c
@@ -104,7 +104,7 @@ CS+=				\
 all:	 emdoom
 
 emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES)
-	$(CC) $(CFLAGS_FINAL) $(LDFLAGS) $^ -o emdoom $(LIBS)
+	$(CC) $(CFLAGS_FINAL)  $^ -o emdoom $(LDFLAGS) $(LIBS)
 
 support/baked_texture_data.c : emdoom.gentables
 	./emdoom.gentables
