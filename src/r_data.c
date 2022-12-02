@@ -24,8 +24,8 @@
 //-----------------------------------------------------------------------------
 
 
-static const char
-rcsid[] = "$Id: r_data.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: r_data.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -479,6 +479,7 @@ void R_InitTextures (void)
 	    I_Error ("R_InitTextures: bad texture directory");
 	
 	mtexture = (maptexture_t *) ( (byte *)maptex + offset);
+	fprintf( stderr, "OFFSET: %p %d %d\n", maptex, offset, mtexture->patchcount );
 
 	texture = textures[i] =
 	    Z_Malloc (sizeof(texture_t)
@@ -497,7 +498,16 @@ void R_InitTextures (void)
 	{
 	    patch->originx = SHORT(mpatch->originx);
 	    patch->originy = SHORT(mpatch->originy);
-	    patch->patch = patchlookup[SHORT(mpatch->patch)];
+	    if( mpatch->patch >= nummappatches )
+	    {
+	    	// Odd - this might be a bug with the actual texture here.
+			fprintf( stderr, "WARNING WARNING WARNING mpatch->patch %d > %d @ %d / %d\n", mpatch->patch, nummappatches, j, texture->patchcount );
+	    	patch->patch = nummappatches-1;
+	    }
+	    else
+	    {
+		    patch->patch = patchlookup[SHORT(mpatch->patch)];
+		}
 	    if (patch->patch == -1)
 	    {
 		I_Error ("R_InitTextures: Missing patch in texture %s",

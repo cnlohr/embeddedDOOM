@@ -24,8 +24,8 @@
 //-----------------------------------------------------------------------------
 
 
-static const char
-rcsid[] = "$Id: p_user.c,v 1.3 1997/01/28 22:08:29 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: p_user.c,v 1.3 1997/01/28 22:08:29 b1 Exp $";
 
 
 #include "doomdef.h"

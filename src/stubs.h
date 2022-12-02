@@ -11,10 +11,12 @@
 //We can create tables for things like the textures and maps... You can set the flags here to produce these.
 //Don't do this on target hardware!!!
 
+#ifndef FIXED_HEAP
 #ifdef GENERATE_BAKED
 #define FIXED_HEAP 40000000 //Heap size when running on computer to store full size.
 #else
 #define FIXED_HEAP (384*1024)   //Actual heap for embedded device.
+#endif
 #endif
 
 
@@ -24,6 +26,7 @@
 
 
 #ifdef STUB_SOUND
+#define __S_SOUND__
 #define S_StartSound( dev, sound )
 #define S_ChangeMusic( musnum, id)
 #define I_UpdateSound(x)

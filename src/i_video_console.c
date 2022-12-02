@@ -23,15 +23,12 @@
 //
 //-----------------------------------------------------------------------------
 
-//static const char
-//rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <errno.h>
-#include <X11/keysym.h>
 #include <netinet/in.h>
 #include <signal.h>
 #include "doomstat.h"
@@ -42,13 +39,16 @@
 
 #include "doomdef.h"
 
+
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/time.h>
+
 #define POINTER_WARP_COUNTDOWN	1
 
-#include "os_generic.c"
-#include "XDriver.c"
-#include "DrawFunctions.c"
-
-
+/*
 
 void HandleKey( int keycode, int bDown ){
 
@@ -252,6 +252,198 @@ void I_FinishUpdate (void)
 	}
 
 	CNFGUpdateScreenWithBitmap( bmdata,SCREENWIDTH, SCREENHEIGHT );
+}
+
+*/
+
+
+
+
+
+
+
+//
+// I_SetPalette
+//
+
+static byte lpalette[256*3];
+
+void I_SetPalette (byte* palette)
+{
+	memcpy(lpalette, palette, sizeof( lpalette ));
+    //UploadNewPalette(X_cmap, palette);
+	
+}
+
+
+
+
+static int is_eofd;
+
+static void CtrlC()
+{
+	exit( 0 );
+}
+
+static void ResetKeyboardInput();
+// Override keyboard, so we can capture all keyboard input for the VM.
+static void CaptureKeyboardInput()
+{
+	// Hook exit, because we want to re-enable keyboard.
+	atexit(ResetKeyboardInput);
+	signal(SIGINT, CtrlC);
+
+	struct termios term;
+	tcgetattr(0, &term);
+	term.c_lflag &= ~(ICANON | ECHO); // Disable echo as well
+	tcsetattr(0, TCSANOW, &term);
+}
+
+static void ResetKeyboardInput()
+{
+	// Re-enable echo, etc. on keyboard.
+	struct termios term;
+	tcgetattr(0, &term);
+	term.c_lflag |= ICANON | ECHO;
+	tcsetattr(0, TCSANOW, &term);
+}
+
+static int ReadKBByte()
+{
+	if( is_eofd ) return 0xffffffff;
+	char rxchar = 0;
+	int rread = read(fileno(stdin), (char*)&rxchar, 1);
+	if( rread > 0 ) // Tricky: getchar can't be used with arrow keys.
+		return rxchar;
+	else
+		return 0xffffffff;
+}
+
+static int IsKBHit()
+{
+	if( is_eofd ) return 0;
+	if( write( fileno(stdin), 0, 0 ) != 0 ) { is_eofd = 1; return 1; } // Is end-of-file.
+	int byteswaiting;
+	ioctl(0, FIONREAD, &byteswaiting);
+	return !!byteswaiting;
+}
+
+
+//
+// I_UpdateNoBlit
+//
+void I_UpdateNoBlit (void)
+{
+    // what is this?
+}
+
+void I_InitGraphics(void)
+{
+
+	CaptureKeyboardInput();
+	//CNFGSetup( "Doom", SCREENWIDTH, SCREENHEIGHT );
+}
+
+uint8_t downmap[256];
+
+void I_StartTic (void)
+{
+	    event_t event;
+	//CNFGHandleInput();
+	
+	if( IsKBHit() )
+	{
+		event.type = ev_keydown;
+		event.data1 = ReadKBByte();
+		
+		if( event.data1 == 10 ) event.data1 = KEY_ENTER;
+		D_PostEvent(&event);
+		downmap[(uint8_t)event.data1] = 10;
+		printf( "DOWN %d\n", event.data1 );
+	}
+	
+	int i;
+	for( i = 0; i < 256; i++ )
+	{
+		if( downmap[i] )
+		{
+			if( --downmap[i] == 0 )
+			{
+				event.type = ev_keyup;
+				event.data1 = i;
+				printf( "UP %d\n", i );
+				D_PostEvent(&event);
+			}
+		}
+	}
+}
+
+void I_ReadScreen (byte* scr)
+{
+    memcpy( scr, screens[0], SCREENWIDTH*SCREENHEIGHT);
+}
+
+void I_StartFrame()
+{
+}
+
+void I_ShutdownGraphics(void)
+{
+	exit(0);
+}
+
+
+void I_FinishUpdate (void)
+{
+
+    static int	lasttic;
+    int		tics;
+    int		i;
+    // UNUSED static unsigned char *bigscreen=0;
+
+    // draws little dots on the bottom of the screen
+    /*
+    if (devparm)
+    {
+
+	i = I_GetTime();
+	tics = i - lasttic;
+	lasttic = i;
+	if (tics > 20) tics = 20;
+
+	for (i=0 ; i<tics*2 ; i+=2)
+	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+	for ( ; i<20*2 ; i+=2)
+	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+    }*/
+
+/*
+	uint32_t bmdata[SCREENWIDTH*SCREENHEIGHT];
+	for( i = 0; i < SCREENWIDTH*SCREENHEIGHT; i++ )
+	{
+		//lpalette
+		int col = screens[0][i];
+		bmdata[i] = (lpalette[col*3+0]<<16)|(lpalette[col*3+1]<<8)|(lpalette[col*3+2]<<0);
+	}
+	*/
+	static int lscreenw = SCREENWIDTH/2;
+	static int lscreenh = SCREENHEIGHT/4;
+#if 1
+	int x, y;
+	for( y = 0; y < lscreenh; y++ )
+	{
+		int ly = y * SCREENHEIGHT / lscreenh;
+		printf( "\x1b[%d;%dH", y+1, 1 );
+		for( x = 0; x < lscreenw; x++ )
+		{
+			int lx = x * SCREENWIDTH / lscreenw;
+			int col = screens[0][ lx+ly*SCREENWIDTH];
+			int selcolor = (lpalette[col*3+0]>100) | (lpalette[col*3+1]>100)*2 | (lpalette[col*3+2]>100)*4;
+			printf( "\x1b[4%dm%c", selcolor, '0' + col/4 );
+		}
+	}
+	fflush( stdout );
+	#endif
 }
 
 

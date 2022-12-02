@@ -20,8 +20,8 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +41,8 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #include "m_argv.h"
 
 #include "doomstat.h"
+
+#ifndef DISABLE_NETWORK
 
 #ifdef __GNUG__
 #pragma implementation "i_net.h"
@@ -345,4 +347,20 @@ void I_NetCmd (void)
     else
 	I_Error ("Bad net cmd: %i\n",doomcom->command);
 }
+
+#else
+void I_NetCmd (void) { }
+void I_InitNetwork (void) {
+
+
+    doomcom = malloc (sizeof (*doomcom) );
+    memset (doomcom, 0, sizeof(*doomcom) );
+	doomcom-> ticdup = 1;    
+	netgame = false;
+	doomcom->id = DOOMCOM_ID;
+	doomcom->numplayers = doomcom->numnodes = 1;
+	doomcom->deathmatch = false;
+	doomcom->consoleplayer = 0;
+}
+#endif
 

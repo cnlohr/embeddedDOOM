@@ -8,22 +8,42 @@
 HOSTGCC=gcc
 
 CC=  gcc  # gcc or g++
+CC_HOST = gcc
+# 
+CFLAGS:=-m32 -O1 -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DDISABLE_NETWORK  # -DUSEASM 
+LDFLAGS:=-L/usr/X11R6/lib $(CFLAGS)
+LIBS:=-lXext -lX11 -lnsl -lm -lpthread
+CFLAGS_HOST:= $(CFLAGS)
+LDFLAGS_HOST:=-L/usr/X11R6/lib
+LIBS_HOST:=-lXext -lX11 -lnsl -lm -lpthread
+CS:=i_video_console.c
 
-CFLAGS= -m32 -O1 -g -w -flto -DNORMALUNIX -DLINUX # -DUSEASM 
-LDFLAGS=-L/usr/X11R6/lib $(CFLAGS)
-LIBS=-lXext -lX11 -lnsl -lm -lpthread
+#CFLAGS_FINAL:=$(CFLAGS)
+#CFLAGS_FINAL+=-DFIXED_HEAP=262144
+#CS:=i_video.c
+
+# if you need to do low-level memory debugging.
+CFLAGS_HOST+=-fsanitize=address -static-libasan -g
+
+# For RISC-V
+#CFLAGS:=-fno-stack-protector -static-libgcc -fdata-sections -ffunction-sections -g -Os -march=rv32ima -mabi=ilp32 -static -I/usr/include -DRV32IMA_BUILD -DDISABLE_NETWORK
+#CFLAGS_HOST+=
+#LDFLAGS:= -T flatfile-rv32ima.lds -nostdlib -Wl,--gc-sections
+#LIBS:=
+#SUPPORT_FILES:=startup.S
+#CC:=riscv64-unknown-elf-gcc
+
 
 BAKED:=support/rawwad.o support/baked_texture_data.o support/baked_map_data.o
 # subdirectory for objects
 O=linux
 
 # not too sophisticated dependency
-CS=				\
+CS+=				\
 		doomdef.c \
 		doomstat.c \
 		dstrings.c \
 		i_system.c		\
-		i_video.c		\
 		tables.c			\
 		f_finale.c		\
 		f_wipe.c 		\
@@ -75,9 +95,6 @@ CS=				\
 		hu_lib.c			\
 		z_zone.c			\
 		info.c				\
-		os_generic.c	\
-		XDriver.c \
-		DrawFunctions.c \
 		i_net.c			\
 		d_net.c			\
 		stubs.c    \
@@ -87,14 +104,20 @@ CS=				\
 
 all:	 emdoom
 
-emdoom:	$(CS) i_main.c $(BAKED)
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom $(LIBS)
+emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES)
+	$(CC) $(CFLAGS_FINAL) $(LDFLAGS) $^ -o emdoom $(LIBS)
 
 support/baked_texture_data.c : emdoom.gentables
 	./emdoom.gentables
 
 support/baked_map_data.c : emdoom.gentables
 	./emdoom.gentables
+
+support/baked_map_data.o : support/baked_map_data.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+support/baked_texture_data.o : support/baked_texture_data.c
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 support/wadder : support/wadder.c
 	$(HOSTGCC) -o $@ $^
@@ -106,18 +129,22 @@ support/rawwad.o : support/rawwad.c
 	$(CC) $(CFLAGS) -c -o tmp.o $^
 	mv tmp.o $@
 
+support/rawwad_host.o : support/rawwad.c
+	$(CC_HOST) $(CFLAGS_HOST) -c -o tmp.o $^
+	mv tmp.o $@
+
 emdoom.size : emdoom
 	nm --print-size --size-sort --radix=d emdoom  | grep -v " r " | grep -v " R "
 	size emdoom -A
 
-emdoom.gentables : i_main.c support/rawwad.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o emdoom.gentables $(LIBS) -DGENERATE_BAKED $(CS)
+emdoom.gentables : i_main.c support/rawwad_host.o
+	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) $^ -o emdoom.gentables -DGENERATE_BAKED $(CS) $(LIBS_HOST) 
 
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f emdoom emdoom.gentables $(BAKED) support/wadder
-
+	rm -f emdoom emdoom.gentables $(BAKED) support/wadder support/rawwad_host.o
+	rm -rf support/baked_map_data.c  support/baked_texture_data.c
 
 #############################################################
 #

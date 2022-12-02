@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: p_mobj.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: p_mobj.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -649,7 +649,7 @@ void P_SpawnPlayer (mapthing_t* mthing)
     mobj_t*		mobj;
 
     int			i;
-
+fprintf( stderr, "SPAWN PLAYER %d\n", mthing->type );
     // not playing?
     if (!playeringame[mthing->type-1])
 	return;					
@@ -728,8 +728,10 @@ void P_SpawnMapThing (mapthing_t* mthing)
     // check for players specially
     if (mthing->type <= 4)
     {
+    	if( mthing->type > MAXPLAYERS ) return;
 	// save spots for respawning in network games
-	playerstarts[mthing->type-1] = *mthing;
+	
+		playerstarts[mthing->type-1] = *mthing;
 	if (!deathmatch)
 	    P_SpawnPlayer (mthing);
 
@@ -756,10 +758,10 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	    break;
 	
     if (i==NUMMOBJTYPES)
-	I_Error ("P_SpawnMapThing: Unknown type %i at (%i, %i)",
-		 mthing->type,
-		 mthing->x, mthing->y);
-		
+		I_Error ("P_SpawnMapThing: Unknown type (%i) %i at (%i, %i)", i,
+			 mthing->type,
+			 mthing->x, mthing->y);
+			
     // don't spawn keycards and players in deathmatch
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
 	return;

@@ -23,8 +23,8 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: info.c,v 1.3 1997/01/26 07:45:00 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: info.c,v 1.3 1997/01/26 07:45:00 b1 Exp $";
 
 // Data.
 #include "sounds.h"

@@ -218,7 +218,7 @@ V_DrawPatch
 	 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
-#ifdef RANGECHECK 
+#if defined( RANGECHECK )
     if (x<0
 	||x+SHORT(patch->width) >SCREENWIDTH
 	|| y<0

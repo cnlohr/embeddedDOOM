@@ -22,8 +22,9 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: p_setup.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
+
+//static const char
+//rcsid[] = "$Id: p_setup.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
 
 
 #include <math.h>
@@ -528,6 +529,7 @@ void P_LoadNodes (int lump)
     node_t*	no;
 	
     numnodes = W_LumpLength (lump) / sizeof(mapnode_t);
+    printf( "NUMNODES---->%d\n", numnodes );
     nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);	
     data = W_CacheLumpNum (lump,PU_STATIC);
 	
