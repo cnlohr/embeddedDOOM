@@ -23,7 +23,7 @@ CS?=i_video.c
 #CS:=i_video.c
 
 # if you need to do low-level memory debugging.  This will help find things like out-of-array writing.
-CFLAGS_HOST+=-fsanitize=address -static-libasan -g
+#CFLAGS_HOST+=-fsanitize=address -static-libasan -g
 
 # For RISC-V
 #CFLAGS:=-fno-stack-protector -static-libgcc -fdata-sections -ffunction-sections -g -Os -march=rv32ima -mabi=ilp32 -static -I/usr/include -DRV32IMA_BUILD -DDISABLE_NETWORK -I/usr/include

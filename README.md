@@ -14,7 +14,7 @@ Right now, it uses (on -m32 / linux):
    * Configurable in stubs.h -- variable is DOOMHeap
    * Framebuffer lives in this space.  It's `CombinedScreens` -- Note: This is not the normal behavior, normally DOOM Keeps 4 copies of each screen, but we just lie and alias all 4 copies.  It does mean you can't get the blood transitions between levels and the end screens get a tad sloppy.
  * .data: 45,600 bytes
- * .text: 109,608 bytes
+ * .text: 108,536 bytes
  * .rodata: 5,685,632 bytes -- Includes the WAD files.
 
 Also, this build requires no file I/O had has highly customizable user input and video output.
@@ -38,13 +38,14 @@ I cut out screen transitions because it took an extra 64kB on the Heap!
 ## Files of interest
 
  * stubs.h/.c is where most of the control for the pairin
- * doomdef.h - just has some useful bits.
+ * doomdef.h - just has some useful bits. Consider turning on `RANGECHECK` if you are going to be making substantial changes.
  * i_*.c has al the interface files for a host system.
  * Check out if the configuration of COMBINE_SCREENS is what you want.  It controls how the screen memory is allocated.
 
+
 ## Building, etc.
 
-  * Type "make" -- this builds the .wad into a .c, and into the target arch's .o.  Then, it builds doom with that and a very large heap.  It runs it once to generate all of the tables used for various things.  It then writes those tables to .c files in the support/ folder... Which it compiles into target arch .o's.  These .o's are linked in to provide the tables needed in .ro so they aren't taking up prescious ram.
+  * Type "make" -- this builds the .wad into a .c (if build step is uncommented) and into the target arch's .o.  Then, it builds doom with that and a very large heap.  It runs it once to generate all of the tables used for various things.  It then writes those tables to .c files in the support/ folder... Which it compiles into target arch .o's.  These .o's are linked in to provide the tables needed in .ro so they aren't taking up prescious ram.
 
 To see memory usage:
 
@@ -53,7 +54,7 @@ To see memory usage:
 ## TODO:
 
  * Figure out how to separate out things like the lines and line segments into rodata and .data/.bss.
- * Figure out how to change screen size successfully.
+ * Figure out how to change screen size successfully.  It just really loves making errors.
 
 ## To port
 
