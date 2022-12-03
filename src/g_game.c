@@ -1348,9 +1348,9 @@ void G_DoNewGame (void)
     netdemo = false;
     netgame = false;
     deathmatch = false;
-	int j;
-	for( j = 1; j < MAXPLAYERS; j++ )
-	    playeringame[j] = 0;
+	int i;
+	for( i = 1; i < MAXPLAYERS; i++ )
+		playeringame[i] = 0;
     respawnparm = false;
     fastparm = false;
     nomonsters = false;
@@ -1606,11 +1606,14 @@ void G_DoPlayDemo (void)
 	
     for (i=0 ; i<MAXPLAYERS ; i++) 
 	playeringame[i] = *demo_p++; 
+
+#if MAXPLAYERS > 1
     if (playeringame[1]) 
     { 
 	netgame = true; 
 	netdemo = true; 
     }
+#endif
 
     // don't spend a lot of time in loadlevel 
     precache = false;
@@ -1667,7 +1670,9 @@ boolean G_CheckDemoStatus (void)
 	netdemo = false;
 	netgame = false;
 	deathmatch = false;
-	playeringame[1] = playeringame[2] = playeringame[3] = 0;
+	int i;
+	for( i = 1; i < MAXPLAYERS; i++ )
+		playeringame[i] = 0;
 	respawnparm = false;
 	fastparm = false;
 	nomonsters = false;

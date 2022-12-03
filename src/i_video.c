@@ -199,7 +199,7 @@ void I_UpdateNoBlit (void)
 
 void I_InitGraphics(void)
 {
-	CNFGSetup( "Doom", SCREENWIDTH, SCREENHEIGHT );
+	CNFGSetup( "EmbeddedDoom", SCREENWIDTH*2, SCREENHEIGHT*2 );
 }
 
 void I_StartTic (void)
@@ -243,15 +243,28 @@ void I_FinishUpdate (void)
     
     }
 
-	uint32_t bmdata[SCREENWIDTH*SCREENHEIGHT];
-	for( i = 0; i < SCREENWIDTH*SCREENHEIGHT; i++ )
+	// This is for display on PC only.  Don't worry about the output staging buffer
+	// being big!
+
+	static uint32_t * bmdata;
+	if( !bmdata ) bmdata = malloc(SCREENWIDTH*SCREENHEIGHT*4*4);
+
+	int y, x;
+	for( y = 0; y < SCREENHEIGHT; y++ )
 	{
-		//lpalette
-		int col = screens[0][i];
-		bmdata[i] = (lpalette[col*3+0]<<16)|(lpalette[col*3+1]<<8)|(lpalette[col*3+2]<<0);
+		const uint8_t * screenline = &screens[0][y*SCREENWIDTH];
+		uint32_t * outline = &bmdata[y*SCREENWIDTH*2*2];
+		int xt2 = 0;
+		for( x = 0; x < SCREENWIDTH; x++, xt2+=2 )
+		{
+			//lpalette
+			int col = screenline[x];
+			uint32_t rgb = (lpalette[col*3+0]<<16)|(lpalette[col*3+1]<<8)|(lpalette[col*3+2]<<0) | 0xff000000;
+			outline[xt2+SCREENWIDTH*2] = outline[xt2+SCREENWIDTH*2+1] = outline[xt2] = outline[xt2+1] = rgb;
+		}
 	}
 
-	CNFGUpdateScreenWithBitmap( bmdata,SCREENWIDTH, SCREENHEIGHT );
+	CNFGUpdateScreenWithBitmap( bmdata,SCREENWIDTH*2, SCREENHEIGHT*2 );
 }
 
 
