@@ -10,7 +10,7 @@ HOSTGCC?=gcc
 CC?=gcc  # gcc or g++
 CC_HOST?=gcc
 # 
-CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
+CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DRANGECHECK -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
 LDFLAGS?=-L/usr/X11R6/lib -Wl,--gc-sections $(CFLAGS)
 LIBS?=-lXext -lX11 -lnsl -lm -lpthread
 CFLAGS_HOST?=-m32
