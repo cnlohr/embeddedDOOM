@@ -108,7 +108,7 @@ all:	 emdoom
 emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES) support/rawwad_use.o
 	$(CC) $(CFLAGS_FINAL)  $^ -o emdoom $(LDFLAGS) $(LIBS)
 
-gentableslog.txt support/baked_texture_data.c support/baked_map_data.c support/baked_map_data.c : emdoom.gentables.initial
+gentableslog.txt support/baked_texture_data.c support/baked_map_data.c : emdoom.gentables.initial
 	./emdoom.gentables.initial $(STRIKEMAP) > gentableslog.txt
 
 #support/baked_map_data.c support/baked_texture_data.c : emdoom.gentables
