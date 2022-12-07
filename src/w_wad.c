@@ -17,16 +17,20 @@
 // $Log:$
 //
 // DESCRIPTION:
-//	Handles WAD file header, directory, lump I/O.
+//		Handles WAD file header, directory, lump I/O.
 //
 //-----------------------------------------------------------------------------
 
-
-static const char
-rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
+//static const char
+//rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 
 //Added elsewhere
+
+#ifdef GENERATE_BAKED
 #include "support/rawwad.h"
+#else
+#include "support/rawwad_use.h"
+#endif
 
 #ifdef NORMALUNIX
 #include <ctype.h>
@@ -36,7 +40,7 @@ rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <alloca.h>
-#define O_BINARY		0
+#define O_BINARY				0
 #endif
 
 #include "doomtype.h"
@@ -53,7 +57,7 @@ rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 
 int filelength (int handle) 
 { 
-	return sizeof( rawwad );
+		return sizeof( rawwad );
 }
 
 
@@ -63,48 +67,48 @@ int filelength (int handle)
 //
 
 // Location of each lump on disk.
-//lumpinfo_t*		lumpinfo;		
-//int			numlumps;
-//void**			lumpcache;
+//lumpinfo_t*				lumpinfo;				
+//int						numlumps;
+//void**						lumpcache;
 
 
-#define strcmpi	strcasecmp
+#define strcmpi		strcasecmp
 
 void strupr (char* s)
 {
-    while (*s) { *s = toupper(*s); s++; }
+	while (*s) { *s = toupper(*s); s++; }
 }
 
 
 void
 ExtractFileBase
-( char*		path,
-  char*		dest )
+( char*				path,
+  char*				dest )
 {
-    char*	src;
-    int		length;
+	char*		src;
+	int				length;
 
-    src = path + strlen(path) - 1;
-    
-    // back up until a \ or the start
-    while (src != path
-	   && *(src-1) != '\\'
-	   && *(src-1) != '/')
-    {
-	src--;
-    }
-    
-    // copy up to eight characters
-    memset (dest,0,8);
-    length = 0;
-    
-    while (*src && *src != '.')
-    {
-	if (++length == 9)
-	    I_Error ("Filename base of %s >8 chars",path);
+	src = path + strlen(path) - 1;
+	
+	// back up until a \ or the start
+	while (src != path
+		   && *(src-1) != '\\'
+		   && *(src-1) != '/')
+	{
+		src--;
+	}
+	
+	// copy up to eight characters
+	memset (dest,0,8);
+	length = 0;
+	
+	while (*src && *src != '.')
+	{
+		if (++length == 9)
+			I_Error ("Filename base of %s >8 chars",path);
 
-	*dest++ = toupper((int)*src++);
-    }
+		*dest++ = toupper((int)*src++);
+	}
 }
 
 
@@ -128,13 +132,13 @@ ExtractFileBase
 //  specially to allow map reloads.
 // But: the reload feature is a fragile hack...
 
-int			reloadlump;
-char*			reloadname;
+int						reloadlump;
+char*						reloadname;
 
 
 void W_AddFile (char *filename)
 {
-	return;
+		return;
 
 }
 
@@ -148,7 +152,7 @@ void W_AddFile (char *filename)
 //
 void W_Reload (void)
 {
-	//STUB.
+		//STUB.
 }
 
 //
@@ -165,8 +169,8 @@ void W_Reload (void)
 //  does override all earlier ones.
 //
 void W_InitMultipleFiles (char** filenames)
-{	
-	return;
+{		
+		return;
 }
 
 
@@ -178,11 +182,11 @@ void W_InitMultipleFiles (char** filenames)
 //
 void W_InitFile (char* filename)
 {
-    char*	names[2];
+	char*		names[2];
 
-    names[0] = filename;
-    names[1] = NULL;
-    W_InitMultipleFiles (names);
+	names[0] = filename;
+	names[1] = NULL;
+	W_InitMultipleFiles (names);
 }
 
 
@@ -192,7 +196,7 @@ void W_InitFile (char* filename)
 //
 int W_NumLumps (void)
 {
-    return numlumps;
+	return numlumps;
 }
 
 
@@ -204,43 +208,47 @@ int W_NumLumps (void)
 
 int W_CheckNumForName (char* name)
 {
-    union {
-	char	s[9];
-	int	x[2];
+	union {
+		char	s[9];
+		int		x[2];
+	} name8;
 	
-    } name8;
-    
-    int		v1;
-    int		v2;
-    lumpinfo_t*	lump_p;
+	int				v1;
+	int				v2;
+	lumpinfo_t*		lump_p;
 
-    // make the name into two integers for easy compares
-    strncpy (name8.s,name,8);
+	// make the name into two integers for easy compares
+	strncpy (name8.s,name,8);
 
-    // in case the name was a fill 8 chars
-    name8.s[8] = 0;
+	// in case the name was a fill 8 chars
+	name8.s[8] = 0;
 
-    // case insensitive
-    strupr (name8.s);		
+	// case insensitive
+	strupr (name8.s);				
 
-    v1 = name8.x[0];
-    v2 = name8.x[1];
+	v1 = name8.x[0];
+	v2 = name8.x[1];
 
 
-    // scan backwards so patch lump files take precedence
-    lump_p = lumpinfo + numlumps;
+	// scan backwards so patch lump files take precedence
+	lump_p = lumpinfo + numlumps;
 
-    while (lump_p-- != lumpinfo)
-    {
-	if ( *(int *)lump_p->name == v1
-	     && *(int *)&lump_p->name[4] == v2)
+	while (lump_p-- != lumpinfo)
 	{
-	    return lump_p - lumpinfo;
+		if ( *(int *)lump_p->name == v1
+			 && *(int *)&lump_p->name[4] == v2)
+		{
+#ifdef GENERATE_BAKED
+			printf( "\nACCESS_LUMP 0 %d\n", lump_p - lumpinfo );
+#endif
+			return lump_p - lumpinfo;
+		}
 	}
-    }
 
-    // TFB. Not found.
-    return -1;
+	printf( "WARNING: FILE NOT FOUND: %s\n", name );
+
+	// TFB. Not found.
+	return -1;
 }
 
 
@@ -252,14 +260,14 @@ int W_CheckNumForName (char* name)
 //
 int W_GetNumForName (char* name)
 {
-    int	i;
+	int		i;
 
-    i = W_CheckNumForName (name);
-    
-    if (i == -1)
-      I_Error ("W_GetNumForName: %s not found!", name);
-      
-    return i;
+	i = W_CheckNumForName (name);
+
+	if (i == -1)
+	  I_Error ("W_GetNumForName: %s not found!", name);
+  
+	return i;
 }
 
 
@@ -269,10 +277,13 @@ int W_GetNumForName (char* name)
 //
 int W_LumpLength (int lump)
 {
-    if (lump >= numlumps)
-	I_Error ("W_LumpLength: %i >= numlumps",lump);
+#ifdef GENERATE_BAKED
+	printf( "\nACCESS_LUMP 1 %d\n", lump );
+#endif
+	if (lump >= numlumps)
+		I_Error ("W_LumpLength: %i >= numlumps",lump);
 
-    return lumpinfo[lump].size;
+	return lumpinfo[lump].size;
 }
 
 
@@ -282,17 +293,19 @@ int W_LumpLength (int lump)
 // Loads the lump into the given buffer,
 //  which must be >= W_LumpLength().
 //
-void
-W_ReadLump
-( int		lump,
-  void*		dest )
+void W_ReadLump( int lump, void* dest )
 {
-    int		c;
-    lumpinfo_t*	l;
-    int		handle;
-    if (lump >= numlumps)
-	I_Error ("W_ReadLump: %i >= numlumps",lump);
-    l = lumpinfo+lump;
+	int				c;
+	lumpinfo_t*		l;
+	int				handle;
+
+#ifdef GENERATE_BAKED
+	printf( "\nACCESS_LUMP 2 %d\n", lump );
+#endif
+	if (lump >= numlumps)
+		I_Error ("W_ReadLump: %i >= numlumps",lump);
+
+	l = lumpinfo+lump;
 	memcpy( dest, &rawwad[l->position], l->size  );
 }
 
@@ -304,48 +317,56 @@ W_ReadLump
 //
 const void*
 W_CacheLumpNum
-( int		lump,
-  int		tag )
+( int				lump,
+  int				tag )
 {
-    byte*	ptr;
+	byte*		ptr;
 
-    if ((unsigned)lump >= numlumps)
-		I_Error ("W_CacheLumpNum: %i >= numlumps",lump);
+#ifdef GENERATE_BAKED
+	printf( "\nACCESS_LUMP 3 %d\n", lump );
+#endif
+	if ((unsigned)lump >= numlumps)
+				I_Error ("W_CacheLumpNum: %i >= numlumps",lump);
 
-    return &rawwad[lumpinfo[lump].position];
+	return &rawwad[lumpinfo[lump].position];
 
-/*    if (!lumpcache[lump])
-    {
-	// read the lump in
-	
-	//printf ("cache miss on lump %i\n",lump);
-	ptr = Z_Malloc (W_LumpLength (lump), tag, &lumpcache[lump]);
-		W_ReadLump (lump, lumpcache[lump]);
-    }
-    else
-    {
-		//printf ("cache hit on lump %i\n",lump);
-		Z_ChangeTag (lumpcache[lump],tag);
-    }
-	
-    return lumpcache[lump];*/
+/*	if (!lumpcache[lump])
+	{
+		// read the lump in
+		
+		//printf ("cache miss on lump %i\n",lump);
+		ptr = Z_Malloc (W_LumpLength (lump), tag, &lumpcache[lump]);
+				W_ReadLump (lump, lumpcache[lump]);
+	}
+	else
+	{
+				//printf ("cache hit on lump %i\n",lump);
+				Z_ChangeTag (lumpcache[lump],tag);
+	}
+		
+	return lumpcache[lump];*/
 }
 
 
 void*
 W_CacheLumpNum_Old
-( int		lump,
-  int		tag )
+( int				lump,
+  int				tag )
 {
-    byte*	ptr;
+	byte*		ptr;
 
-    if ((unsigned)lump >= numlumps)
+#ifdef GENERATE_BAKED
+	printf( "\nACCESS_LUMP 4 %d\n", lump );
+#endif
+
+	if ((unsigned)lump >= numlumps)
 		I_Error ("W_CacheLumpNum: %i >= numlumps",lump);
 
 	ptr = Z_Malloc (W_LumpLength (lump), tag, 0 );
-		W_ReadLump (lump, ptr);
 
-    return ptr;
+	W_ReadLump (lump, ptr);
+
+	return ptr;
 }
 
 
@@ -354,10 +375,10 @@ W_CacheLumpNum_Old
 //
 void*
 W_CacheLumpName
-( char*		name,
-  int		tag )
+( char*				name,
+  int				tag )
 {
-    return W_CacheLumpNum (W_GetNumForName(name), tag);
+	return W_CacheLumpNum (W_GetNumForName(name), tag);
 }
 
 

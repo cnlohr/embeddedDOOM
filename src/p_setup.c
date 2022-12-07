@@ -604,7 +604,7 @@ void P_LoadVertexes (int lump)
 void
 P_SetupLevel
 ( int		episode,
-  int		map,
+  void *	map,
   int		playermask,
   skill_t	skill)
 {
@@ -644,39 +644,74 @@ P_SetupLevel
 
     // if working with a devlopment map, reload it
     W_Reload ();			
-	   
-    // find map name
-    if ( gamemode == commercial)
-    {
-	if (map<10)
-	    sprintf (lumpname,"map0%i", map);
+
+#if 1
+	if( map>100 )
+	{
+		// map is actually pointer.
+		strcpy( lumpname, map );
+		printf( "LOADING MAP %s\n", map );
+	}
 	else
-	    sprintf (lumpname,"map%i", map);
-    }
-    else
-    {
-	lumpname[0] = 'E';
-	lumpname[1] = '0' + episode;
-	lumpname[2] = 'M';
-	lumpname[3] = '0' + map;
-	lumpname[4] = 0;
-    }
+	{
+		// find map name
+		if ( gamemode == commercial)
+		{
+			if (map<10)
+				sprintf (lumpname,"map0%i", map);
+			else
+				sprintf (lumpname,"map%i", map);
+		}
+		else
+		{
+			lumpname[0] = 'E';
+			lumpname[1] = '0' + episode;
+			lumpname[2] = 'M';
+			lumpname[3] = '0' + map;
+			lumpname[4] = 0;
+		}
+	}
+#endif
+
+#ifndef GENERATE_BAKED
+	int mapid = 0;
+	while( bakemaps[mapid] )
+	{
+		if( strcmp( bakemaps[mapid], lumpname ) == 0 )
+			break;
+
+		mapid++;
+	}
+	if( bakemaps[mapid] == 0 )
+	{
+		I_Error( "Can't find map." );
+	}
+
+	numvertexes = numvertexes_baked[mapid];
+	vertexes = vertexes_baked[mapid];
+#endif
 
     lumpnum = W_GetNumForName (lumpname);
 	
     leveltime = 0;
 	
     // note: most of this ordering is important	
+
+	//XXX TODO: I think some of these can be dumped into preloaded arrays.
     P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
+#ifdef GENERATE_BAKED
     P_LoadVertexes (lumpnum+ML_VERTEXES);
+#endif
     P_LoadSectors (lumpnum+ML_SECTORS);
     P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
 
     P_LoadLineDefs (lumpnum+ML_LINEDEFS);
     P_LoadSubsectors (lumpnum+ML_SSECTORS);
+#ifdef GENERATE_BAKED
     P_LoadNodes (lumpnum+ML_NODES);
+#endif
     P_LoadSegs (lumpnum+ML_SEGS);
-	
+
     rejectmatrix = W_CacheLumpNum (lumpnum+ML_REJECT,PU_LEVEL);
     P_GroupLines ();
 
@@ -779,11 +814,14 @@ P_SetupLevel
 /*    P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
     P_LoadVertexes (lumpnum+ML_VERTEXES);
 */
+
+fprintf( stderr, "LOADING FROM MAP: %s\n", lumpname );
 	int mapid = 0;
 	while( bakemaps[mapid] )
 	{
 		if( strcmp( bakemaps[mapid], lumpname ) == 0 )
 			break;
+
 		mapid++;
 	}
 	if( bakemaps[mapid] == 0 )

@@ -13,7 +13,7 @@ CC_HOST?=gcc
 CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DRANGECHECK -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
 LDFLAGS?=-L/usr/X11R6/lib -Wl,--gc-sections $(CFLAGS)
 LIBS?=-lXext -lX11 -lnsl -lm -lpthread
-CFLAGS_HOST?=-m32
+CFLAGS_HOST?=-m32 -DNORMALUNIX -DLINUX 
 LDFLAGS_HOST?=-L/usr/X11R6/lib
 LIBS_HOST?=-lXext -lX11 -lnsl -lm -lpthread
 CS?=i_video.c
@@ -32,8 +32,10 @@ CS?=i_video.c
 #SUPPORT_FILES:=startup.S
 #CC:=riscv64-unknown-elf-gcc
 
+# Tricky - if removing maps, also be careful to add/remove maps from stripchoice.txt
+STRIKEMAP:=-strikemap 2 3 4 5 6 7 8 9 
 
-BAKED:=support/rawwad.o support/baked_texture_data.o support/baked_map_data.o
+BAKED:=support/baked_texture_data.o support/baked_map_data.o
 # subdirectory for objects
 O=linux
 
@@ -103,14 +105,14 @@ CS+=				\
 
 all:	 emdoom
 
-emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES)
+emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES) support/rawwad_use.o
 	$(CC) $(CFLAGS_FINAL)  $^ -o emdoom $(LDFLAGS) $(LIBS)
 
-support/baked_texture_data.c : emdoom.gentables
-	./emdoom.gentables
+gentableslog.txt support/baked_texture_data.c support/baked_map_data.c support/baked_map_data.c : emdoom.gentables.initial
+	./emdoom.gentables.initial $(STRIKEMAP) > gentableslog.txt
 
-support/baked_map_data.c : emdoom.gentables
-	./emdoom.gentables
+#support/baked_map_data.c support/baked_texture_data.c : emdoom.gentables
+#	./emdoom.gentables $(STRIKEMAP)
 
 support/baked_map_data.o : support/baked_map_data.c
 	$(CC) $(CFLAGS) -c -o $@ $^
@@ -125,26 +127,51 @@ support/wadder : support/wadder.c
 #support/rawwad.c : support/wadder
 #	(cd support;./wadder;cd ..)
 
-support/rawwad.o : support/rawwad.c
+support/rawwad_use.o : support/rawwad_use.c
 	$(CC) $(CFLAGS) -c -o tmp.o $^
+	mv tmp.o $@
+
+
+support/rawwad_use_host.o : support/rawwad_use.c
+	$(CC_HOST) $(CFLAGS_HOST) -c -o tmp.o $^
 	mv tmp.o $@
 
 support/rawwad_host.o : support/rawwad.c
 	$(CC_HOST) $(CFLAGS_HOST) -c -o tmp.o $^
 	mv tmp.o $@
 
+support/rawwad_host_begin.o : support/rawwad_begin.c
+	$(CC_HOST) $(CFLAGS_HOST) -c -o tmp.o $^
+	mv tmp.o $@
+
+
 emdoom.size : emdoom
 	nm --print-size --size-sort --radix=d emdoom  | grep -v " r " | grep -v " R "
 	size emdoom -A
 
-emdoom.gentables : i_main.c support/rawwad_host.o
-	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) $^ -o emdoom.gentables -DGENERATE_BAKED $(CS) $(LIBS_HOST) 
+#emdoom.gentables : i_main.c $(CS) support/rawwad_host_begin.o $(BAKED)
+#	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) $^ -o emdoom.gentables -g -DGENERATE_BAKED $(LIBS_HOST)
+
+emdoom.gentables.initial : i_main.c $(CS) support/rawwad_host_begin.o
+	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) $^ -o emdoom.gentables.initial -g -DGENERATE_BAKED -DGENERATE_BAKED_INITIAL $(LIBS_HOST)
 
 
 clean:
 	rm -f *.o *~ *.flc
-	rm -f emdoom emdoom.gentables $(BAKED) support/wadder support/rawwad_host.o
+	rm -f emdoom emdoom.gentables emdoom.gentables.initial $(BAKED) support/wadder support/rawwad_host.o support/rawwad_host_use.o support/rawwad_host_begin.o support/shrinkwad
 	rm -rf support/baked_map_data.c  support/baked_texture_data.c
+
+### Extra features
+
+support/shrinkwad : support/shrinkwad.c
+	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) -o $@ $^ $(LIBS_HOST) 
+
+support/rawwad_use.c : support/shrinkwad support/stripchoice.txt
+	cd support && ./shrinkwad stripchoice.txt rawwad_use.c rawwad_use.h
+
+support/rawwad_begin.c : support/shrinkwad support/stripchoicebegin.txt
+	#cat gentableslog.txt | grep -a ACCESS_LUMP > lumpaccess.txt
+	cd support && ./shrinkwad stripchoicebegin.txt rawwad_begin.c rawwad_begin.h
 
 #############################################################
 #

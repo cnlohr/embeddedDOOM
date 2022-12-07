@@ -479,7 +479,6 @@ void R_InitTextures (void)
 	    I_Error ("R_InitTextures: bad texture directory");
 	
 	mtexture = (maptexture_t *) ( (byte *)maptex + offset);
-	fprintf( stderr, "OFFSET: %p %d %d\n", maptex, offset, mtexture->patchcount );
 
 	texture = textures[i] =
 	    Z_Malloc (sizeof(texture_t)
@@ -655,18 +654,18 @@ void R_InitData (void)
 //
 int R_FlatNumForName (char* name)
 {
-    int		i;
-    char	namet[9];
+	int		i;
+	char	namet[9];
 
-    i = W_CheckNumForName (name);
+	i = W_CheckNumForName (name);
 
-    if (i == -1)
-    {
-	namet[8] = 0;
-	memcpy (namet, name,8);
-	I_Error ("R_FlatNumForName: %s not found",namet);
-    }
-    return i - firstflat;
+	if (i == -1)
+	{
+		namet[8] = 0;
+		memcpy (namet, name,8);
+		I_Error ("R_FlatNumForName: %s not found",namet);
+	}
+	return i - firstflat;
 }
 
 
@@ -759,6 +758,11 @@ void R_PrecacheLevel (void)
 	if (flatpresent[i])
 	{
 	    lump = firstflat + i;
+
+#ifdef GENERATE_BAKED
+		printf( "\nACCESS_LUMP 7 %d\n", lump );
+#endif
+
 	    flatmemory += lumpinfo[lump].size;
 	    W_CacheLumpNum(lump, PU_CACHE);
 	}
@@ -794,6 +798,11 @@ void R_PrecacheLevel (void)
 	for (j=0 ; j<texture->patchcount ; j++)
 	{
 	    lump = texture->patches[j].patch;
+
+#ifdef GENERATE_BAKED
+		printf( "\nACCESS_LUMP 6 %d\n", lump );
+#endif
+
 	    texturememory += lumpinfo[lump].size;
 	    W_CacheLumpNum(lump , PU_CACHE);
 	}
@@ -821,6 +830,12 @@ void R_PrecacheLevel (void)
 	    for (k=0 ; k<8 ; k++)
 	    {
 		lump = firstspritelump + sf->lump[k];
+
+
+#ifdef GENERATE_BAKED
+		printf( "\nACCESS_LUMP 8 %d\n", lump );
+#endif
+
 		spritememory += lumpinfo[lump].size;
 		W_CacheLumpNum(lump , PU_CACHE);
 	    }

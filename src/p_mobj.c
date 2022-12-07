@@ -649,7 +649,7 @@ void P_SpawnPlayer (mapthing_t* mthing)
     mobj_t*		mobj;
 
     int			i;
-fprintf( stderr, "SPAWN PLAYER %d\n", mthing->type );
+
     // not playing?
     if (!playeringame[mthing->type-1])
 	return;					

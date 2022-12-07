@@ -33,7 +33,7 @@
 void
 P_SetupLevel
 ( int		episode,
-  int		map,
+  void *	map,
   int		playermask,
   skill_t	skill);
 
