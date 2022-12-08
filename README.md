@@ -25,17 +25,14 @@ So, theoretically, you could run this on a system with only 384kB RAM.
 
 Because DOOM (in its current state is 32-bit ONLY, you can only compile to 32-bit targets.  This is OK though, since the Makefile includes `-m32`, but you must install the 32-bit compat libs with the following:
 
+#### On Debian/Ubuntu based systems:
 ```
 sudo apt-get install gcc-multilib libx11-dev:i386 libxext-dev:i386
 ```
-
-On Debian/Ubuntu based systems.
-
+#### On Arch based systems:
 ```
 sudo pacman -S lib32-libx11 lib32-libxext lib32-libnsl gcc-multilib
 ```
-
-On Arch based systems.
 
 ## Btw
 
