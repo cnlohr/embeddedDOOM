@@ -18,6 +18,11 @@ LDFLAGS_HOST?=-L/usr/X11R6/lib
 LIBS_HOST?=-lXext -lX11 -lnsl -lm -lpthread
 CS?=i_video.c
 
+
+# If you want to reduce printf junk
+CFLAGS+=-DSET_MEMORY_DEBUG=0
+
+
 #CFLAGS_FINAL:=$(CFLAGS)
 #CFLAGS_FINAL+=-DFIXED_HEAP=262144
 #CS:=i_video.c
@@ -108,8 +113,11 @@ all:	 emdoom
 emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES) support/rawwad_use.o
 	$(CC) $(CFLAGS_FINAL)  $^ -o emdoom $(LDFLAGS) $(LIBS)
 
-gentableslog.txt support/baked_texture_data.c support/baked_map_data.c : emdoom.gentables.initial
-	./emdoom.gentables.initial $(STRIKEMAP) > gentableslog.txt
+support/baked_texture_data.c support/baked_map_data.c bakedoutput.txt : emdoom.gentables.initial
+	./emdoom.gentables.initial $(STRIKEMAP) > support/bakedoutput.txt
+
+support/add_sprites.txt : support/bakedoutput.txt
+	cat support/bakedoutput.txt | grep ADD_SPRITE > support/add_sprites.txt
 
 #support/baked_map_data.c support/baked_texture_data.c : emdoom.gentables
 #	./emdoom.gentables $(STRIKEMAP)
@@ -166,12 +174,12 @@ clean:
 support/shrinkwad : support/shrinkwad.c
 	$(CC_HOST) $(CFLAGS_HOST) $(LDFLAGS_HOST) -o $@ $^ $(LIBS_HOST) 
 
-support/rawwad_use.c : support/shrinkwad support/stripchoice.txt
-	cd support && ./shrinkwad stripchoice.txt rawwad_use.c rawwad_use.h
+support/rawwad_use.c : support/shrinkwad support/stripchoice.txt support/add_sprites.txt
+	cd support && ./shrinkwad stripchoice.txt add_sprites.txt rawwad_use.c rawwad_use.h
 
 support/rawwad_begin.c : support/shrinkwad support/stripchoicebegin.txt
 	#cat gentableslog.txt | grep -a ACCESS_LUMP > lumpaccess.txt
-	cd support && ./shrinkwad stripchoicebegin.txt rawwad_begin.c rawwad_begin.h
+	cd support && ./shrinkwad stripchoicebegin.txt 0 rawwad_begin.c rawwad_begin.h
 
 #############################################################
 #

@@ -1156,7 +1156,7 @@ typedef struct
 } state_t;
 
 extern state_t	states[NUMSTATES];
-extern char *sprnames[NUMSPRITES+1];
+extern const char * const sprnames[NUMSPRITES+1];
 
 
 

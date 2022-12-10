@@ -513,6 +513,10 @@ P_SpawnMobj
     mobj->sprite = st->sprite;
     mobj->frame = st->frame;
 
+#ifdef GENERATE_BAKED
+	printf( "ADD_SPRITE 2 %d %s\n", mobj->sprite, sprnames[mobj->sprite] );
+#endif
+	
     // set subsector and/or block links
     P_SetThingPosition (mobj);
 	
@@ -756,7 +760,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     for (i=0 ; i< NUMMOBJTYPES ; i++)
 	if (mthing->type == mobjinfo[i].doomednum)
 	    break;
-	
+
     if (i==NUMMOBJTYPES)
 		I_Error ("P_SpawnMapThing: Unknown type (%i) %i at (%i, %i)", i,
 			 mthing->type,
@@ -773,7 +777,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     {
 	return;
     }
-    
+
     // spawn it
     x = mthing->x << FRACBITS;
     y = mthing->y << FRACBITS;

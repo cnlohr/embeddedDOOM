@@ -187,7 +187,7 @@ void I_SetPalette (byte* palette)
 	
 }
 
-
+#define OUTSCALE 1
 
 //
 // I_UpdateNoBlit
@@ -199,7 +199,7 @@ void I_UpdateNoBlit (void)
 
 void I_InitGraphics(void)
 {
-	CNFGSetup( "EmbeddedDoom", SCREENWIDTH*2, SCREENHEIGHT*2 );
+	CNFGSetup( "EmbeddedDoom", SCREENWIDTH*OUTSCALE, SCREENHEIGHT*OUTSCALE );
 }
 
 void I_StartTic (void)
@@ -227,44 +227,47 @@ void I_FinishUpdate (void)
     int		i;
     // UNUSED static unsigned char *bigscreen=0;
 
+#if 0
     // draws little dots on the bottom of the screen
     if (devparm)
     {
+		i = I_GetTime();
+		tics = i - lasttic;
+		lasttic = i;
+		if (tics > 20) tics = 20;
 
-	i = I_GetTime();
-	tics = i - lasttic;
-	lasttic = i;
-	if (tics > 20) tics = 20;
-
-	for (i=0 ; i<tics*2 ; i+=2)
-	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
-	for ( ; i<20*2 ; i+=2)
-	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
-    
+		for (i=0 ; i<tics*2 ; i+=2)
+			screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+		for ( ; i<20*2 ; i+=2)
+			screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;	
     }
+#endif
 
 	// This is for display on PC only.  Don't worry about the output staging buffer
 	// being big!
 
 	static uint32_t * bmdata;
-	if( !bmdata ) bmdata = malloc(SCREENWIDTH*SCREENHEIGHT*4*4);
+	if( !bmdata ) bmdata = malloc(SCREENWIDTH*SCREENHEIGHT*OUTSCALE*OUTSCALE*4);
 
 	int y, x;
 	for( y = 0; y < SCREENHEIGHT; y++ )
 	{
 		const uint8_t * screenline = &screens[0][y*SCREENWIDTH];
-		uint32_t * outline = &bmdata[y*SCREENWIDTH*2*2];
+		uint32_t * outline = &bmdata[y*SCREENWIDTH*OUTSCALE*OUTSCALE];
 		int xt2 = 0;
-		for( x = 0; x < SCREENWIDTH; x++, xt2+=2 )
+		for( x = 0; x < SCREENWIDTH; x++, xt2+=OUTSCALE )
 		{
 			//lpalette
 			int col = screenline[x];
+			int lx, ly;
 			uint32_t rgb = (lpalette[col*3+0]<<16)|(lpalette[col*3+1]<<8)|(lpalette[col*3+2]<<0) | 0xff000000;
-			outline[xt2+SCREENWIDTH*2] = outline[xt2+SCREENWIDTH*2+1] = outline[xt2] = outline[xt2+1] = rgb;
+			for( ly = 0; ly < OUTSCALE; ly++ )
+			for( lx = 0; lx < OUTSCALE; lx++ )
+				outline[xt2+SCREENWIDTH*OUTSCALE*ly+lx] = rgb;
 		}
 	}
 
-	CNFGUpdateScreenWithBitmap( bmdata,SCREENWIDTH*2, SCREENHEIGHT*2 );
+	CNFGUpdateScreenWithBitmap( bmdata,SCREENWIDTH*OUTSCALE, SCREENHEIGHT*OUTSCALE );
 }
 
 

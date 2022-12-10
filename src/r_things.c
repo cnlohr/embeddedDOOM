@@ -110,7 +110,7 @@ R_InstallSpriteLump
   boolean		flipped )
 {
 	int				r;
-printf( "LOADING LUMP %d / %d\n", lump, rotation );
+//printf( "LOADING LUMP %d / %d\n", lump, rotation );
 	if (frame >= 29 || rotation > 8)
 		I_Error("R_InstallSpriteLump: "
 				"Bad frame characters in lump %i", lump);
@@ -210,9 +210,10 @@ void R_InitSpriteDefs (char** namelist)
 	{
 		spritename = namelist[i];
 		memset (sprtemp,-1, sizeof(sprtemp));
-				
+
 		maxframe = -1;
 		intname = *(int *)namelist[i];
+
 
 		// scan the lumps,
 		//  filling in the frames for whatever is found
@@ -441,7 +442,7 @@ R_DrawVisSprite
 		texturecolumn = frac>>FRACBITS;
 #ifdef RANGECHECK
 		if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
-			I_Error ("R_DrawSpriteRange: bad texturecolumn");
+			I_Error ("R_DrawSpriteRange: bad texturecolumn %d %s", vis->patch, lumpinfo[vis->patch+firstspritelump].name);
 #endif
 		column = (column_t *) ((byte *)patch +
 							   LONG(patch->columnofs[texturecolumn]));
@@ -539,7 +540,7 @@ void R_ProjectSprite (mobj_t* thing)
 		lump = sprframe->lump[0];
 		flip = (boolean)sprframe->flip[0];
 	}
-	
+
 	// calculate edges of the shape
 	tx -= spriteoffset[lump];		
 	x1 = (centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS;
@@ -673,7 +674,7 @@ void R_DrawPSprite (pspdef_t* psp)
 	sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
 	if ( (psp->state->frame & FF_FRAMEMASK)  >= sprdef->numframes)
-		I_Error ("R_ProjectSprite: invalid sprite frame %i : %i ",
+		I_Error ("R_DrawPSprite: invalid sprite frame %i : %i ",
 				 psp->state->sprite, psp->state->frame);
 #endif
 	sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];

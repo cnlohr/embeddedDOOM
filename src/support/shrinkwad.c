@@ -5,6 +5,52 @@
 #include "rawwad.h"
 #include "rawwad.c"
 
+#include "../info.h"
+
+const char * const sprnames[NUMSPRITES+1] = {
+    "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
+    "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
+    "PLSS","PLSE","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
+    "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
+    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
+    "BON1","BON2","BKEY","RKEY","YKEY","BSKU","RSKU","YSKU","STIM","MEDI",
+    "SOUL","PINV","PSTR","PINS","MEGA","SUIT","PMAP","PVIS","CLIP","AMMO",
+    "ROCK","BROK","CELL","CELP","SHEL","SBOX","BPAK","BFUG","MGUN","CSAW",
+    "LAUN","PLAS","SHOT","SGN2","COLU","SMT2","GOR1","POL2","POL5","POL4",
+    "POL3","POL1","POL6","GOR2","GOR3","GOR4","GOR5","SMIT","COL1","COL2",
+    "COL3","COL4","CAND","CBRA","COL6","TRE1","TRE2","ELEC","CEYE","FSKU",
+    "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
+    "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2", 0
+};
+
+char usespritemap[NUMSPRITES];
+
+//
+// Texture definition.
+// A DOOM wall texture is a list of patches
+// which are to be combined in a predefined order.
+//
+
+typedef struct
+{
+    short	originx;
+    short	originy;
+    short	patch;
+    short	stepdir;
+    short	colormap;
+} mappatch_t;
+typedef struct
+{
+    char		name[8];
+    char		masked;	
+    short		width;
+    short		height;
+    void		**columndirectory;	// OBSOLETE
+    short		patchcount;
+    mappatch_t	patches[1];
+} maptexture_t;
+
 
 void copy8( char * out, const char * in )
 {
@@ -19,9 +65,9 @@ void copy8( char * out, const char * in )
 
 int main( int argc, char ** argv )
 {
-	if( argc < 4 )
+	if( argc < 5 )
 	{
-		fprintf( stderr, "Error: Usage: ./shrinkwad [choice file] [.c file] [.h file]\n" );
+		fprintf( stderr, "Error: Usage: ./shrinkwad [choice file] [texture file, or '0' to ignore] [.c file] [.h file]\n" );
 		return -9;
 	}
 	char *line = NULL;
@@ -29,6 +75,8 @@ int main( int argc, char ** argv )
 	ssize_t drd;
 	int i;
 	int chunkmap[numlumps];
+	
+	
 #if 0
 	memset( chunkmap, 0, numlumps * sizeof( int ) );
 	FILE * flumpaccess = fopen( "../lumpaccess.txt", "r" );
@@ -52,6 +100,105 @@ int main( int argc, char ** argv )
 		chunkmap[i] = 1;
 #endif
 
+
+
+	if( argv[2][0] != '0' )
+	{
+		memset( usespritemap, 0, sizeof(  usespritemap ) );
+		FILE * fAccessSprites = fopen( argv[2], "r" );
+		if( ! fAccessSprites )
+		{
+			fprintf( stderr, "Error: can't open %s\n", argv[2] );
+			return -9;
+		}
+		while( !feof( fAccessSprites ) && !ferror( fAccessSprites ) )
+		{
+			char cstart[128];
+			int dummy1;
+			int spriteno;
+			char csend[16];
+			int ct = fscanf( fAccessSprites, "%127s %d %d %15s\n", cstart, &dummy1, &spriteno, csend );
+			if( ct != 4 )
+			{
+				fprintf( stderr, "Error: invalid sprite on line %d\n", ct );
+				return -113;
+			}
+			if( spriteno >= NUMSPRITES )
+			{
+				fprintf( stderr, "Error: Invalid sprite (too big) %d\n", spriteno );
+				return -112;
+			}
+			if( dummy1 != 1 )
+				usespritemap[spriteno] = 1;
+		}
+		fclose( fAccessSprites );
+	}
+	else
+	{
+		memset( usespritemap, 1, sizeof(usespritemap) );
+	}
+
+
+	
+	int j;
+	for( j = 0; j < NUMSPRITES; j++ )
+	{
+		printf( "%s: %d\n", sprnames[j], usespritemap[j] );
+		if( usespritemap[j] == 0 )
+		{
+			printf( "Stripping %s\n", sprnames[j] );
+
+			for( i = 0 ; i < numlumps; i++ )
+			{
+				if( strncmp( lumpinfo[i].name, sprnames[j], 4 ) == 0 )
+				{
+					chunkmap[i] = -1;
+					char ct9[9] = { 0 };
+					memcpy( ct9, lumpinfo[i].name, 8 );
+					printf( "  %s\n", ct9 );
+				}
+			}
+		}
+	}
+
+	// XXX TRICKY: Find "TEXTURE1" as that actually contains our texture list.
+	int * texture1data; 
+	int * texdirectory;
+	int numtex = 0;
+	int texture1datasize;
+	for( i = 0 ; i < numlumps; i++ )
+	{
+		if( strncmp( lumpinfo[i].name, "TEXTURE1", 8 ) == 0 )
+		{
+			int offset = lumpinfo[i].position;
+			texture1datasize = lumpinfo[i].position;
+			texture1data = malloc( texture1datasize+1 );
+			memcpy( texture1data, &rawwad[offset], texture1datasize );
+			((unsigned char*)texture1data)[texture1datasize] = 0;
+		}
+	}
+	if( !texture1data )
+	{
+		fprintf( stderr, "ERROR: Need 'TEXTURE1' lump in wad.\n" );
+		return -5;
+	}
+	{
+		maptexture_t * mtexture;
+		numtex = *texture1data;
+		printf( "Num Textures: %d\n", numtex );
+		texdirectory = texture1data+1;
+		int * directory = texdirectory;
+		
+		for( i = 0; i < numtex; i++, directory++ )
+		{
+			int offset = (int)(*directory);
+			mtexture = (maptexture_t *) ( (unsigned char *)texture1data + offset);
+			char sname[9] = { 0 };
+			memcpy( sname, mtexture->name, 8 );
+			printf( "%s(%d) ", sname, mtexture->patchcount * sizeof(mappatch_t) );
+		}
+	}
+	
 	FILE * fneverstrip = fopen( argv[1], "r" );
 	printf( "Open %s status: %p\n", argv[1], fneverstrip );
 	while ((drd = getline(&line, &len, fneverstrip)) != -1)
@@ -88,7 +235,7 @@ int main( int argc, char ** argv )
 				{
 					//Apply selection to everything in this map.
 					int k;
-					printf( "Section applying for %s\n", header+1 );
+					printf( "Section applying for %s (%d)\n", header+1, chunkmap[chunkno] );
 					for( k = 1; k <= 10; k++ )
 					{
 						chunkmap[chunkno+k] = chunkmap[chunkno];
@@ -103,7 +250,7 @@ int main( int argc, char ** argv )
 			fprintf( stderr, "WARNING: Chunkno out of range #2. (%d) (%s)\n", chunkno, header+1 );
 		}
 	}
-	
+
 
 	printf( "Loaded list.\n" );
 
@@ -128,11 +275,9 @@ int main( int argc, char ** argv )
 			numnewchunks++;
 		}
 	}
-	printf( "Did save %d\n", couldsave );
-	printf( "New Total: %d\n", newtotal );
 
-	FILE * f_c = fopen( argv[2], "w" );
-	FILE * f_h = fopen( argv[3], "w" );
+	FILE * f_c = fopen( argv[3], "w" );
+	FILE * f_h = fopen( argv[4], "w" );
 
 	fprintf( f_h, "#ifndef _RAWWAD_H\n"
 	"#define _RAWWAD_H\n"
@@ -160,7 +305,7 @@ int main( int argc, char ** argv )
 		{
 			char stp[9] = { 0 };
 			copy8( stp, lumpinfo[i].name );
-			printf( "%s ", stp );
+			printf( "%s(%d) ", stp, lumpinfo[i].size );
 		}
 		else if( chunkmap[i] == 1 )
 		{
@@ -181,11 +326,13 @@ int main( int argc, char ** argv )
 		{
 			char stp[9] = { 0 };
 			copy8( stp, lumpinfo[i].name );
-			printf( "%s ", stp );
+			printf( "%s(%d) ", stp, (chunkmap[i]<0)?0:lumpinfo[i].size );
 		}
 	}
 
 	printf( "\n" );
+	printf( "Did save %d\n", couldsave );
+	printf( "New Total: %d\n", newtotal );
 
 	printf( "Comparing: %d/%d/%d\n", tlump, numnewchunks, numlumps );
 

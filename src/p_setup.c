@@ -457,53 +457,53 @@ void P_GroupLines (void)
 //
 void P_LoadThings (int lump)
 {
-    byte*		data;
-    int			i;
-    mapthing_t*		mt;
-    int			numthings;
-    boolean		spawn;
-	
-    data = W_CacheLumpNum_Old(lump,PU_STATIC);
-    numthings = W_LumpLength (lump) / sizeof(mapthing_t);
-	
-    mt = (mapthing_t *)data;
-    for (i=0 ; i<numthings ; i++, mt++)
-    {
-	spawn = true;
+	byte*		data;
+	int			i;
+	mapthing_t*		mt;
+	int			numthings;
+	boolean		spawn;
 
-	// Do not spawn cool, new monsters if !commercial
-	if ( gamemode != commercial)
+	data = W_CacheLumpNum_Old(lump,PU_STATIC);
+	numthings = W_LumpLength (lump) / sizeof(mapthing_t);
+
+	mt = (mapthing_t *)data;
+	for (i=0 ; i<numthings ; i++, mt++)
 	{
-	    switch(mt->type)
-	    {
-	      case 68:	// Arachnotron
-	      case 64:	// Archvile
-	      case 88:	// Boss Brain
-	      case 89:	// Boss Shooter
-	      case 69:	// Hell Knight
-	      case 67:	// Mancubus
-	      case 71:	// Pain Elemental
-	      case 65:	// Former Human Commando
-	      case 66:	// Revenant
-	      case 84:	// Wolf SS
-		spawn = false;
-		break;
-	    }
-	}
-	if (spawn == false)
-	    break;
+		spawn = true;
 
-	// Do spawn all other stuff. 
-	mt->x = SHORT(mt->x);
-	mt->y = SHORT(mt->y);
-	mt->angle = SHORT(mt->angle);
-	mt->type = SHORT(mt->type);
-	mt->options = SHORT(mt->options);
-	
-	P_SpawnMapThing (mt);
-    }
-	
-    Z_Free (data);// Don't free, CacheLumpNum just gives us a pointer to the data.
+		// Do not spawn cool, new monsters if !commercial
+		if ( gamemode != commercial)
+		{
+			switch(mt->type)
+			{
+				case 68:	// Arachnotron
+				case 64:	// Archvile
+				case 88:	// Boss Brain
+				case 89:	// Boss Shooter
+				case 69:	// Hell Knight
+				case 67:	// Mancubus
+				case 71:	// Pain Elemental
+				case 65:	// Former Human Commando
+				case 66:	// Revenant
+				case 84:	// Wolf SS
+					spawn = false;
+				break;
+			}
+		}
+		if (spawn == false)
+			break;
+
+		// Do spawn all other stuff. 
+		mt->x = SHORT(mt->x);
+		mt->y = SHORT(mt->y);
+		mt->angle = SHORT(mt->angle);
+		mt->type = SHORT(mt->type);
+		mt->options = SHORT(mt->options);
+
+		P_SpawnMapThing (mt);
+	}
+
+	Z_Free (data);// Don't free, CacheLumpNum just gives us a pointer to the data.
 }
 
 
