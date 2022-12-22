@@ -12,6 +12,7 @@
 #-MAN*
 #-DSP*
 +PISGA*
++PUFF*
 
 +S_END
 +F1_END
