@@ -27,7 +27,7 @@ Because DOOM (in its current state is 32-bit ONLY, you can only compile to 32-bi
 
 #### On Debian/Ubuntu based systems:
 ```
-sudo apt-get install gcc-multilib libx11-dev:i386 libxext-dev:i386
+sudo apt-get install gcc-multilib libx11-dev:i386 libxext-dev:i386 libnsl-dev:i386
 ```
 #### On Arch based systems:
 ```
