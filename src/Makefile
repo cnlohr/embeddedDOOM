@@ -10,10 +10,15 @@ HOSTGCC?=gcc
 CC?=gcc  # gcc or g++
 CC_HOST?=gcc
 # 
-CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DRANGECHECK -DDISABLE_NETWORK -fdata-sections -ffunction-sections # -DUSEASM 
+
+# for E1M1 Only, 
+#  make clean && cp support/stripchoice-E1M1ONLY.txt support/stripchoice.txt && cp support/stripchoice-E1M1ONLY.txt support/stripchoicebegin.txt && EXTRA_CFLAGS="-DE1M1ONLY=1" make && ls -l emdoom
+# 
+
+CFLAGS?=-m32 -Os -g -w -flto -DNORMALUNIX -DLINUX -DMAXPLAYERS=1 -DRANGECHECK -DDISABLE_NETWORK -fdata-sections -ffunction-sections $(EXTRA_CFLAGS) # -DUSEASM 
 LDFLAGS?=-L/usr/X11R6/lib -Wl,--gc-sections $(CFLAGS)
 LIBS?=-lXext -lX11 -lnsl -lm -lpthread
-CFLAGS_HOST?=-m32 -DNORMALUNIX -DLINUX 
+CFLAGS_HOST?=-m32 -DNORMALUNIX -DLINUX $(EXTRA_CFLAGS)
 LDFLAGS_HOST?=-L/usr/X11R6/lib
 LIBS_HOST?=-lXext -lX11 -lnsl -lm -lpthread
 CS?=i_video.c
@@ -116,8 +121,9 @@ emdoom:	$(CS) i_main.c $(BAKED) $(SUPPORT_FILES) support/rawwad_use.o
 support/baked_texture_data.c support/baked_map_data.c bakedoutput.txt : emdoom.gentables.initial
 	./emdoom.gentables.initial $(STRIKEMAP) > support/bakedoutput.txt
 
-support/add_sprites.txt : support/bakedoutput.txt
+support/add_sprites.txt : support/bakedoutput.txt support/augment_sprites.txt
 	cat support/bakedoutput.txt | grep ADD_SPRITE > support/add_sprites.txt
+	cat support/augment_sprites.txt >> support/add_sprites.txt
 
 #support/baked_map_data.c support/baked_texture_data.c : emdoom.gentables
 #	./emdoom.gentables $(STRIKEMAP)
@@ -132,8 +138,8 @@ support/wadder : support/wadder.c
 	$(HOSTGCC) -o $@ $^
 
 # Don't normally need to do this, so it's hidden from the steps.
-#support/rawwad.c : support/wadder
-#	(cd support;./wadder;cd ..)
+support/rawwad.c : support/wadder
+	(cd support;./wadder;cd ..)
 
 support/rawwad_use.o : support/rawwad_use.c
 	$(CC) $(CFLAGS) -c -o tmp.o $^
@@ -168,6 +174,7 @@ clean:
 	rm -f *.o *~ *.flc
 	rm -f emdoom emdoom.gentables emdoom.gentables.initial $(BAKED) support/wadder support/rawwad_host.o support/rawwad_host_use.o support/rawwad_host_begin.o support/shrinkwad
 	rm -rf support/baked_map_data.c  support/baked_texture_data.c
+	rm -rf support/rawwad_begin.c support/rawwad_begin.o support/rawwad_use.c support/rawwad_use.o support/bakedoutput.txt
 
 ### Extra features
 

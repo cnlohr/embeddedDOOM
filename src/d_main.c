@@ -683,7 +683,7 @@ void D_DoomMain (void)
 	}
 	//D_AddFile (file);
     }
-	
+
 /*
     p = M_CheckParm ("-file");
     if (p)
@@ -744,6 +744,12 @@ void D_DoomMain (void)
     if (p && p < myargc-1 && deathmatch)
 	printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
 
+#if E1M1ONLY
+	p = 1;
+    startepisode = 1;
+    startmap = 1;
+	autostart = true;
+#else
     p = M_CheckParm ("-warp");
     if (p && p < myargc-1)
     {
@@ -756,6 +762,7 @@ void D_DoomMain (void)
 	}
 	autostart = true;
     }
+#endif
     
     // init subsystems
     printf ("V_Init: allocate screens.\n");
@@ -1138,9 +1145,14 @@ extern const texture_t**	textures;
 #endif
 
 
-		#define BAKE_MAPS 9
 		int j;
+#if E1M1ONLY
+		#define BAKE_MAPS 1
+		const char * bakemaps[BAKE_MAPS+1] = { "E1M1", 0 };
+#else
+		#define BAKE_MAPS 9
 		const char * bakemaps[BAKE_MAPS+1] = { "E1M1", "E1M2", "E1M3", "E1M4", "E1M5", "E1M6", "E1M7", "E1M8", "E1M9", 0 };
+#endif
 
 		// For if we want to select a subset of maps.
 	    p = M_CheckParm ("-strikemap");

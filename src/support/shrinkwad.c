@@ -101,6 +101,7 @@ int main( int argc, char ** argv )
 #endif
 
 
+	int usingspritemap = 0;
 
 	if( argv[2][0] != '0' )
 	{
@@ -129,9 +130,13 @@ int main( int argc, char ** argv )
 				return -112;
 			}
 			if( dummy1 != 1 )
+			{
+				printf( "%s marked for use\n", sprnames[spriteno] );
 				usespritemap[spriteno] = 1;
+			}
 		}
 		fclose( fAccessSprites );
+		usingspritemap = 1;
 	}
 	else
 	{
@@ -251,7 +256,29 @@ int main( int argc, char ** argv )
 		}
 	}
 
-
+/*
+	if( usespritemap )
+	{
+		// If using the sprite map, then need to zero out
+		//0VERTEXES
+		//0NODES
+		int mtocheck = 8;
+		int chunkno = -1;
+		for( i = 0 ; i < numlumps; i++ )
+		{
+			if( strncmp( lumpinfo[i].name, "VERTEXES", mtocheck ) == 0 )
+			{
+				chunkno = i;
+				chunkmap[chunkno] = 0;
+			}
+			if( strncmp( lumpinfo[i].name, "NODES", mtocheck ) == 0 )
+			{
+				chunkno = i;
+				chunkmap[chunkno] = 0;
+			}
+		}
+	}
+*/
 	printf( "Loaded list.\n" );
 
 	int couldsave = 0;
@@ -352,6 +379,7 @@ int main( int argc, char ** argv )
 		char tsr[9];
 		copy8( tsr, newlumpinfo[i].name );
 		tsr[8] = 0;
+		printf( "LUMP %d = %s %d %d\n", i, tsr, newlumpinfo[i].size?newlumpinfo[i].position:0, newlumpinfo[i].size );
 		fprintf( f_c, "\t{ \"%s\", %d, %d },\n", tsr, newlumpinfo[i].size?newlumpinfo[i].position:0, newlumpinfo[i].size );
 	}
 	fprintf( f_c, "};\n" );

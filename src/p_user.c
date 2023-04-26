@@ -62,9 +62,10 @@ P_Thrust
   fixed_t	move ) 
 {
     angle >>= ANGLETOFINESHIFT;
-    
+    printf( "MOVE: %d\n", move );
     player->mo->momx += FixedMul(move,finecosine[angle]); 
     player->mo->momy += FixedMul(move,finesine[angle]);
+    printf( "MOVEXY: %d %d\n", player->mo->momx, player->mo->momy );
 }
 
 
