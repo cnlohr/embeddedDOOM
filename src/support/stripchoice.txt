@@ -11,8 +11,11 @@
 #-DSB*
 #-MAN*
 #-DSP*
-+PISGA*
++PISG*
++PISF*
 +PUFF*
++BEXP*
++BLUD*
 
 +S_END
 +F1_END
@@ -21,6 +24,7 @@
 +P_END
 +F_START
 +F1_START
+
 0VERTEXES
 0NODES
 +DEMO1
@@ -196,4 +200,5 @@
 +BRDR_BL
 +BRDR_B
 +BRDR_BR
+
 
