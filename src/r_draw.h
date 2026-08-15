@@ -56,6 +56,8 @@ void 	R_DrawFuzzColumnLow (void);
 void	R_DrawTranslatedColumn (void);
 void	R_DrawTranslatedColumnLow (void);
 
+void R_DrawSkyColumn (void);
+
 void
 R_VideoErase
 ( unsigned	ofs,

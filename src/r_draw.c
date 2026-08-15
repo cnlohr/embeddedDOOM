@@ -48,7 +48,7 @@
 #define MAXHEIGHT			832
 
 // status bar height at bottom of screen
-#define SBARHEIGHT		32
+#define SBARHEIGHT		((int)(32 * UI_SCALE_Y))
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -517,6 +517,8 @@ fixed_t			ds_ystep;
 // start of a 64*64 tile image 
 byte*			ds_source;	
 
+#include "scale.h"
+
 // just for profiling
 int			dscount;
 
@@ -555,7 +557,7 @@ void R_DrawSpan (void)
     do 
     {
 	// Current texture index in u,v.
-	spot = ((yfrac>>(16-6))&(63*64)) + ((xfrac>>16)&63);
+	spot = ((yfrac>>(16))&(FLAT_SIZE_MASK*FLAT_SIZE)) + ((xfrac>>19)&FLAT_SIZE_MASK);
 
 	// Lookup pixel from flat texture tile,
 	//  re-index using light/colormap.
@@ -679,7 +681,8 @@ void R_DrawSpanLow (void)
     count = ds_x2 - ds_x1; 
     do 
     { 
-	spot = ((yfrac>>(16-6))&(63*64)) + ((xfrac>>16)&63);
+    spot = ((yfrac>>(16))&(FLAT_SIZE_MASK*FLAT_SIZE)) + ((xfrac>>19)&FLAT_SIZE_MASK);
+
 	// Lowres/blocky mode does it twice,
 	//  while scale is adjusted appropriately.
 	*dest++ = ds_colormap[ds_source[spot]]; 
@@ -878,6 +881,50 @@ void R_DrawViewBorder (void)
 
     // ? 
     V_MarkRect (0,0,SCREENWIDTH, SCREENHEIGHT-SBARHEIGHT); 
-} 
+}
+//
+// R_DrawSkyColumn
+// Identical to R_DrawColumn, except for the vertical wrap mask.
+// The sky's cached column is only SKY_HEIGHT texels tall (the sky
+// texture is shrunk by PATCH_RESCALE in shrinkwad.c, same as wall
+// textures), but the &127 wrap in R_DrawColumn assumes the original
+// 128-tall texture and its 128-slot cache. Sky rendering intentionally
+// relies on this wrap for its vertical looping, so it needs its own
+// correctly-sized mask rather than reusing the generic one.
+#define SKY_HEIGHT      16
+#define SKY_HEIGHT_MASK (SKY_HEIGHT-1)
  
+void R_DrawSkyColumn (void) 
+{ 
+    int			count; 
+    byte*		dest; 
+    fixed_t		frac;
+    fixed_t		fracstep;	 
+ 
+    count = dc_yh - dc_yl; 
+ 
+    if (count < 0) 
+	return; 
+				 
+#ifdef RANGECHECK 
+    if ((unsigned)dc_x >= SCREENWIDTH
+	|| dc_yl < 0
+	|| dc_yh >= SCREENHEIGHT) 
+	I_Error ("R_DrawSkyColumn: %i to %i at %i", dc_yl, dc_yh, dc_x); 
+#endif 
+ 
+    dest = ylookup[dc_yl] + columnofs[dc_x];  
+ 
+    fracstep = dc_iscale; 
+    frac = dc_texturemid + (dc_yl-centery)*fracstep; 
+ 
+    do 
+    {
+	*dest = dc_colormap[dc_source[(frac>>FRACBITS)&SKY_HEIGHT_MASK]];
+	
+	dest += SCREENWIDTH; 
+	frac += fracstep;
+	
+    } while (count--); 
+} 
  

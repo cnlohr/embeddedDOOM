@@ -41,10 +41,10 @@
 
 #include "doomstat.h"
 
-
+#include "scale.h"
 
 #define MINZ								(FRACUNIT*4)
-#define BASEYCENTER						100
+#define BASEYCENTER						((int)(100 * UI_SCALE_Y))
 
 //void R_DrawColumn (void);
 //void R_DrawFuzzColumn (void);
@@ -370,8 +370,8 @@ void R_DrawMaskedColumn (column_t* column)
 	{
 		// calculate unclipped screen coordinates
 		//  for post
-		topscreen = sprtopscreen + spryscale*column->topdelta;
-		bottomscreen = topscreen + spryscale*column->length;
+		topscreen = sprtopscreen + spryscale * SPRITE_SCALE * column->topdelta;
+		bottomscreen = topscreen + spryscale * SPRITE_SCALE * column->length;
 
 		dc_yl = (topscreen+FRACUNIT-1)>>FRACBITS;
 		dc_yh = (bottomscreen-1)>>FRACBITS;
@@ -436,6 +436,8 @@ R_DrawVisSprite
 	frac = vis->startfrac;
 	spryscale = vis->scale;
 	sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
+
+	dc_texturemid = vis->texturemid / SPRITE_SCALE;
 		
 	for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
 	{
@@ -521,8 +523,12 @@ void R_ProjectSprite (mobj_t* thing)
 	sprdef = &sprites[thing->sprite];
 #ifdef RANGECHECK
 	if ( (thing->frame&FF_FRAMEMASK) >= sprdef->numframes )
-		I_Error ("R_ProjectSprite: invalid sprite frame %i : %i ",
-				 thing->sprite, thing->frame);
+		I_Error ("R_ProjectSprite: invalid sprite frame: "
+         "sprite=%i frame=%i masked=%i numframes=%i",
+         thing->sprite,
+         thing->frame,
+         thing->frame & FF_FRAMEMASK,
+         sprdef->numframes);
 #endif
 	sprframe = &sprdef->spriteframes[ thing->frame & FF_FRAMEMASK];
 
@@ -542,14 +548,14 @@ void R_ProjectSprite (mobj_t* thing)
 	}
 
 	// calculate edges of the shape
-	tx -= spriteoffset[lump];		
+	tx -= spriteoffset[lump] * SPRITE_SCALE;		
 	x1 = (centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS;
 
 	// off the right side?
 	if (x1 > viewwidth)
 		return;
 	
-	tx +=  spritewidth[lump];
+	tx +=  spritewidth[lump] * SPRITE_SCALE;
 	x2 = ((centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS) - 1;
 
 	// off the left side
@@ -563,11 +569,12 @@ void R_ProjectSprite (mobj_t* thing)
 	vis->gx = thing->x;
 	vis->gy = thing->y;
 	vis->gz = thing->z;
-	vis->gzt = thing->z + spritetopoffset[lump];
+	vis->gzt = thing->z + spritetopoffset[lump] * SPRITE_SCALE;
 	vis->texturemid = vis->gzt - viewz;
 	vis->x1 = x1 < 0 ? 0 : x1;
 	vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;		
 	iscale = FixedDiv (FRACUNIT, xscale);
+	iscale >>= SPRITE_SCALE/2;
 
 	if (flip)
 	{
@@ -685,14 +692,14 @@ void R_DrawPSprite (pspdef_t* psp)
 	// calculate edges of the shape
 	tx = psp->sx-160*FRACUNIT;
 		
-	tx -= spriteoffset[lump];		
+	tx -= spriteoffset[lump] * SPRITE_SCALE;		
 	x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;
 
 	// off the right side
 	if (x1 > viewwidth)
 		return;				
 
-	tx +=  spritewidth[lump];
+	tx +=  spritewidth[lump] * SPRITE_SCALE;
 	x2 = ((centerxfrac + FixedMul (tx, pspritescale) ) >>FRACBITS) - 1;
 
 	// off the left side
@@ -702,19 +709,19 @@ void R_DrawPSprite (pspdef_t* psp)
 	// store information in a vissprite
 	vis = &avis;
 	vis->mobjflags = 0;
-	vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
+	vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-(spritetopoffset[lump] * SPRITE_SCALE));
 	vis->x1 = x1 < 0 ? 0 : x1;
 	vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;		
 	vis->scale = pspritescale<<detailshift;
 	
 	if (flip)
 	{
-		vis->xiscale = -pspriteiscale;
+		vis->xiscale = -pspriteiscale / SPRITE_SCALE;
 		vis->startfrac = spritewidth[lump]-1;
 	}
 	else
 	{
-		vis->xiscale = pspriteiscale;
+		vis->xiscale = pspriteiscale / SPRITE_SCALE;
 		vis->startfrac = 0;
 	}
 	

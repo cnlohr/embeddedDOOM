@@ -265,6 +265,9 @@ void R_RenderSegLoop (void)
 	    angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
 	    texturecolumn = rw_offset-FixedMul(finetangent[angle],rw_distance);
 	    texturecolumn >>= FRACBITS;
+
+		texturecolumn /= TEXTURE_SCALE;
+
 	    // calculate lighting
 	    index = rw_scale>>LIGHTSCALESHIFT;
 
@@ -274,6 +277,7 @@ void R_RenderSegLoop (void)
 	    dc_colormap = walllights[index];
 	    dc_x = rw_x;
 	    dc_iscale = 0xffffffffu / (unsigned)rw_scale;
+		dc_iscale /= TEXTURE_SCALE;
 	}
 	
 	// draw the wall tiers
@@ -282,7 +286,7 @@ void R_RenderSegLoop (void)
 	    // single sided line
 	    dc_yl = yl;
 	    dc_yh = yh;
-	    dc_texturemid = rw_midtexturemid;
+	    dc_texturemid = rw_midtexturemid / TEXTURE_SCALE;
 	    dc_source = R_GetColumn(midtexture,texturecolumn);
 	    colfunc ();
 	    ceilingclip[rw_x] = viewheight;
@@ -304,7 +308,7 @@ void R_RenderSegLoop (void)
 		{
 		    dc_yl = yl;
 		    dc_yh = mid;
-		    dc_texturemid = rw_toptexturemid;
+		    dc_texturemid = rw_toptexturemid / TEXTURE_SCALE;
 		    dc_source = R_GetColumn(toptexture,texturecolumn);
 		    colfunc ();
 		    ceilingclip[rw_x] = mid;
@@ -333,7 +337,7 @@ void R_RenderSegLoop (void)
 		{
 		    dc_yl = mid;
 		    dc_yh = yh;
-		    dc_texturemid = rw_bottomtexturemid;
+		    dc_texturemid = rw_bottomtexturemid / TEXTURE_SCALE;
 		    dc_source = R_GetColumn(bottomtexture,
 					    texturecolumn);
 		    colfunc ();

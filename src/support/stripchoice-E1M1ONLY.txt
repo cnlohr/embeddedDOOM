@@ -10,7 +10,7 @@
 -DPS*
 -DSS*
 -SARG*
--BAL*
++BAL*
 -DSB*
 -MAN*
 -DSP*
@@ -65,4 +65,5 @@
 +CHG*
 +PISG*
 +BON2*
-
++SHTG*
++SHTF*

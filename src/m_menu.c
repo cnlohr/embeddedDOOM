@@ -125,8 +125,8 @@ char			saveOldString[SAVESTRINGSIZE];
 boolean			inhelpscreens;
 boolean			menuactive;
 
-#define SKULLXOFF		-32
-#define LINEHEIGHT		16
+#define SKULLXOFF		-32 * UI_SCALE_X
+#define LINEHEIGHT		16 * UI_SCALE_Y
 
 extern boolean		sendpause;
 char			savegamestrings[10][SAVESTRINGSIZE];
@@ -264,7 +264,7 @@ menu_t  MainDef =
     NULL,
     MainMenu,
     M_DrawMainMenu,
-    97,64,
+    97 * UI_SCALE_X,64,
     0
 };
 
@@ -295,7 +295,7 @@ menu_t  EpiDef =
     &MainDef,		// previous menu
     EpisodeMenu,	// menuitem_t ->
     M_DrawEpisode,	// drawing routine ->
-    48,63,              // x,y
+    48 * UI_SCALE_X,63 * UI_SCALE_Y,  // x,y
     ep1			// lastOn
 };
 
@@ -327,7 +327,7 @@ menu_t  NewDef =
     &EpiDef,		// previous menu
     NewGameMenu,	// menuitem_t ->
     M_DrawNewGame,	// drawing routine ->
-    48,63,              // x,y
+    48 * UI_SCALE_X,63 * UI_SCALE_Y,              // x,y
     hurtme		// lastOn
 };
 
@@ -367,7 +367,7 @@ menu_t  OptionsDef =
     &MainDef,
     OptionsMenu,
     M_DrawOptions,
-    60,37,
+    60 * UI_SCALE_X,37 * UI_SCALE_Y,
     0
 };
 
@@ -391,7 +391,7 @@ menu_t  ReadDef1 =
     &MainDef,
     ReadMenu1,
     M_DrawReadThis1,
-    280,185,
+    280 * UI_SCALE_X,185* UI_SCALE_Y,
     0
 };
 
@@ -412,7 +412,7 @@ menu_t  ReadDef2 =
     &ReadDef1,
     ReadMenu2,
     M_DrawReadThis2,
-    330,175,
+    330 * UI_SCALE_X,175* UI_SCALE_Y,
     0
 };
 
@@ -442,7 +442,7 @@ menu_t  SoundDef =
     &OptionsDef,
     SoundMenu,
     M_DrawSound,
-    80,64,
+    80 * UI_SCALE_X,64* UI_SCALE_Y,
     0
 };
 
@@ -476,7 +476,7 @@ menu_t  LoadDef =
     &MainDef,
     LoadMenu,
     M_DrawLoad,
-    80,54,
+    80 * UI_SCALE_X,54* UI_SCALE_Y,
     0
 };
 
@@ -499,7 +499,7 @@ menu_t  SaveDef =
     &MainDef,
     SaveMenu,
     M_DrawSave,
-    80,54,
+    80 * UI_SCALE_X,54* UI_SCALE_Y,
     0
 };
 
@@ -543,7 +543,7 @@ void M_DrawLoad(void)
 {
     int             i;
 	
-    V_DrawPatchDirect (72,28,0,W_CacheLumpName("M_LOADG",PU_CACHE));
+    V_DrawPatchDirect (72*UI_SCALE_X,28*UI_SCALE_Y,0,W_CacheLumpName("M_LOADG",PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
 	M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
@@ -611,7 +611,7 @@ void M_DrawSave(void)
 {
     int             i;
 	
-    V_DrawPatchDirect (72,28,0,W_CacheLumpName("M_SAVEG",PU_CACHE));
+    V_DrawPatchDirect (72 * UI_SCALE_X,28 * UI_SCALE_Y,0,W_CacheLumpName("M_SAVEG",PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
 	M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
@@ -799,7 +799,7 @@ void M_DrawReadThis2(void)
 //
 void M_DrawSound(void)
 {
-    V_DrawPatchDirect (60,38,0,W_CacheLumpName("M_SVOL",PU_CACHE));
+    V_DrawPatchDirect (60*UI_SCALE_X,38*UI_SCALE_Y,0,W_CacheLumpName("M_SVOL",PU_CACHE));
 
     M_DrawThermo(SoundDef.x,SoundDef.y+LINEHEIGHT*(sfx_vol+1),
 		 16,snd_SfxVolume);
@@ -855,7 +855,7 @@ void M_MusicVol(int choice)
 //
 void M_DrawMainMenu(void)
 {
-    V_DrawPatchDirect (94,2,0,W_CacheLumpName("M_DOOM",PU_CACHE));
+    V_DrawPatchDirect (94 * UI_SCALE_X,2* UI_SCALE_Y,0,W_CacheLumpName("M_DOOM",PU_CACHE));
 }
 
 
@@ -866,8 +866,8 @@ void M_DrawMainMenu(void)
 //
 void M_DrawNewGame(void)
 {
-    V_DrawPatchDirect (96,14,0,W_CacheLumpName("M_NEWG",PU_CACHE));
-    V_DrawPatchDirect (54,38,0,W_CacheLumpName("M_SKILL",PU_CACHE));
+    V_DrawPatchDirect (96 * UI_SCALE_X,14*UI_SCALE_Y,0,W_CacheLumpName("M_NEWG",PU_CACHE));
+    V_DrawPatchDirect (54 * UI_SCALE_X,38*UI_SCALE_Y,0,W_CacheLumpName("M_SKILL",PU_CACHE));
 }
 
 void M_NewGame(int choice)
@@ -892,7 +892,7 @@ int     epi;
 
 void M_DrawEpisode(void)
 {
-    V_DrawPatchDirect (54,38,0,W_CacheLumpName("M_EPISOD",PU_CACHE));
+    V_DrawPatchDirect (54 * UI_SCALE_X,38*UI_SCALE_Y,0,W_CacheLumpName("M_EPISOD",PU_CACHE));
 }
 
 void M_VerifyNightmare(int ch)
@@ -950,12 +950,12 @@ char	msgNames[2][9]		= {"M_MSGOFF","M_MSGON"};
 
 void M_DrawOptions(void)
 {
-    V_DrawPatchDirect (108,15,0,W_CacheLumpName("M_OPTTTL",PU_CACHE));
+    V_DrawPatchDirect (108 * UI_SCALE_X,15*UI_SCALE_Y,0,W_CacheLumpName("M_OPTTTL",PU_CACHE));
 	
-    V_DrawPatchDirect (OptionsDef.x + 175,OptionsDef.y+LINEHEIGHT*detail,0,
+    V_DrawPatchDirect (OptionsDef.x + 175 * UI_SCALE_X,OptionsDef.y+LINEHEIGHT*detail,0,
 		       W_CacheLumpName(detailNames[detailLevel],PU_CACHE));
 
-    V_DrawPatchDirect (OptionsDef.x + 120,OptionsDef.y+LINEHEIGHT*messages,0,
+    V_DrawPatchDirect (OptionsDef.x + 120 * UI_SCALE_X,OptionsDef.y+LINEHEIGHT*messages,0,
 		       W_CacheLumpName(msgNames[showMessages],PU_CACHE));
 
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(mousesens+1),
