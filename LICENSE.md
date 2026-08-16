@@ -1,3 +1,10 @@
+BELOW is the ORIGINAL license DOOM was released under. 
+
+You may use that or whatever they do for their own code.
+
+All changes I (cnlohr) made can be licensed under this license, BSD,
+MIT or any GPL or AFL licenses.
+
 
 
       LIMITED USE SOFTWARE LICENSE AGREEMENT
